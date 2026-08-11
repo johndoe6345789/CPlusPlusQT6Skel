@@ -1,143 +1,44 @@
-# CPlusPlusQT6Skel
-Hello World Skel files for C++ QT6
+# Qt6 Frontend (MetaBuilder Landing)
 
-## Downloading Qt
+This directory contains a minimal Qt Quick replica of the public MetaBuilder landing page currently rendered by the Next.js `Level1` component.
 
-Use `download_qt6.py` to fetch prebuilt Qt 6 binaries (and optionally source) into the repo so builds work offline.
+## Purpose
 
-### Quick start (Windows desktop, auto-detect)
-```sh
-python download_qt6.py
-```
-Automatically selects your newest installed Visual Studio toolset (preferring VS 2022) and the latest Qt 6 release, then downloads it to `third_party/qt6` with common GUI modules.
+- Mirror the hero marketing copy, feature highlights, contact CTA, and status overview that appear on `frontends/nextjs`.
+- Provide a starting point for building a native Qt6 experience or prototyping desktop/web skins of the MetaBuilder brand.
 
-### Customizing
-- Pick version/arch/output (overrides auto-detection):  
-  `python download_qt6.py --qt-version 6.6.3 --compiler win64_msvc2022_64 --output-dir vendor/qt6`
-- Minimal modules:  
-  `python download_qt6.py --modules qtbase qtdeclarative`
-- Include build tools (ninja + CMake):  
-  `python download_qt6.py --with-tools`
-- Add Qt source (for IDE navigation):  
-  `python download_qt6.py --with-src`  
-  Limit source bundles: `--src-archives qtbase qtdeclarative`
-- Preview only (no downloads):  
-  `python download_qt6.py --dry-run`
+## Running
 
-Default output layout (example):
-```
-third_party/qt6/
-  6.7.2/desktop/...
-  6.7.2/Src/...   # only if --with-src
-```
+1. Install Qt 6 (e.g., via [the official installer](https://www.qt.io/download)) if you don’t already have it.
+2. Run the scene with `qmlscene frontends/qt6/FrontPage.qml` (or build the Qt6 project and run `frontends/qt6/main` so the C++ entry point loads `FrontPage.qml`).
+3. Launch `qmlscene frontends/qt6/Storybook.qml` to explore the Storybook clone and toggle the components interactively.
+4. Open `qmlscene frontends/qt6/PackageManager.qml` to browse the Ubuntu-Store-style package catalog (with repository controls, search, and install/uninstall actions).
 
-## Cross-platform build helper
+You can also embed `main.qml` into a Qt Quick Application project and expose C++ integrations for live data later.
 
-`dev_tool.py` wraps common CMake actions for Windows, macOS, and Linux. It auto-picks Ninja if present (otherwise defers to CMake's default), reconfigures on each call, and tries to find Qt under `third_party/qt6` (or honors `QT_PREFIX_PATH` / `--qt-prefix`).
+## Component library
 
-User defaults (build dir/type, Qt prefix, generator, run targets, Qt download location) are stored in a JSON settings file under XDG config (`~/.config/CPlusPlusQT6Skel/settings.json`) or `%APPDATA%\CPlusPlusQT6Skel\settings.json` on Windows. Manage them with `python dev_tool.py settings`.
+- Shared QML components live under `frontends/qt6/qmllib/MetaBuilder`.
+- Import them via `import "qmllib/MetaBuilder" as MetaBuilder` and reuse `MetaBuilder.NavBar`, `MetaBuilder.HeroSection`, `MetaBuilder.FeatureCard`, `MetaBuilder.StatusCard`, and `MetaBuilder.ContactForm` to keep future pages consistent.
 
-```sh
-# Verify environment (compiler, cmake, generator, Qt) and get guidance to fix it
-python dev_tool.py verify
+## Material UI rendition
 
-# Build everything into ./build (Debug by default)
-python dev_tool.py build
-
-# Build and run the console renderer (skips rebuild on request; omit target to choose from detected targets)
-python dev_tool.py run sample_cli --skip-build -- --help
-
-# Build and run the test suite (passes args to ctest)
-python dev_tool.py test -- -V
-
-# Check for newer Qt / PDCursesMod releases upstream
-python dev_tool.py check-updates
-
-# Configure defaults (build dir, Qt prefix, generator, run targets)
-python dev_tool.py settings --print        # show current values and config path
-python dev_tool.py settings --set build_dir=C:/dev/qt-build
-
-# Verify environment (compiler, cmake, generator, Qt) and get guidance to fix it
-python dev_tool.py verify
-
-# Interactive menu to build / test / run (default if no args and in a TTY)
-python dev_tool.py menu
-# or simply:
-python dev_tool.py
-
-When running without a target, the tool tries to list runnable CMake targets from the current build directory (Ninja targets or `cmake --build --target help`) and falls back to the sample app/CLI defaults.
-```
-
-## Sample Qt Quick app + tests
-
-This repo now contains a minimal Qt 6 + QML app (`sample_app`) plus a small test suite.
-
-### Configure and build (Windows, Ninja + MSVC example)
-```sh
-cmake -B build -G "Ninja" ^
-  -DCMAKE_PREFIX_PATH=%CD%\third_party\qt6\6.10.1\msvc2022_64
-cmake --build build
-```
-
-### Run the GUI app
-```sh
-build\sample_app.exe
-```
-
-### Run the terminal CLI (Win/macOS/Linux)
-`sample_cli` renders the same `qml/Main.qml` layout into the console using curses.
-
-- Windows: builds against the bundled WinCon PDCursesMod (`third_party/PDCursesMod`).
-- macOS/Linux: uses the system curses/ncurses development package (install it first if your distro omits it).
-
-```sh
-# From the build directory produced above:
-./sample_cli             # uses ../qml/Main.qml by default
-./sample_cli path/to/Main.qml  # optional explicit QML path
-```
-
-### Run tests
-```sh
-ctest --test-dir build
-```
-
-## PDCursesMod (WinCon)
-
-The WinCon flavor of [PDCursesMod](https://github.com/Bill-Gray/PDCursesMod) v4.5.3 is vendored in `third_party/PDCursesMod` and exposed via the CMake target `PDCursesMod::pdcurses`. It is built as a static library with only the WinCon backend (no SDL/OpenGL extras) when `BUILD_PDCURSES_WINCON` is ON (default on Windows).
-
-Link it to your target, for example:
-```cmake
-target_link_libraries(your_target PRIVATE PDCursesMod::pdcurses)
-```
-
-## QML to PDCurses prototype
-
-`qml_curses` provides a tiny QML parser plus a PDCursesMod renderer for column-based layouts. It understands basic `ApplicationWindow` + `Column` trees with `Text`, `TextField`, `Label`, and `Button` children and centers them in the console. The target is only built when the vendored `PDCursesMod::pdcurses` library is available.
-
-Example usage:
-```cpp
-#include "qml_curses_frontend.h"
-#include "qml_parser.h"
-#include <curses.h>
-
-int main() {
-    initscr();
-    noecho();
-
-    QmlParser parser;
-    QmlDocument doc = parser.parseFile("qml/Main.qml");
-
-    PdcursesScreen screen;  // wraps stdscr
-    QmlCursesFrontend frontend(screen, [](const std::string &binding) {
-        if (binding == "greeter.message") return std::string("Hello from C++");
-        return binding;
-    });
-    frontend.render(doc);
-
-    getch();
-    endwin();
-    return 0;
-}
-```
-
-The `qml_curses_tests` target exercises the parser and renderer without requiring a live console by mocking the curses screen.
+- Material-inspired components live under `frontends/qt6/qmllib/Material` and provide palette tokens plus buttons, cards, text fields, chips, and sample layouts.
+- Import them with `import "qmllib/Material" as Material` and reference `Material.MaterialButton`, `Material.MaterialCard`, `Material.MaterialTextField`, `Material.MaterialChip`, and the singleton palette `Material.MaterialPalette`.
+- Use `Material.MaterialSurface` and `Material.MaterialDivider` to group controls with Material elevation, spacing, and dividers.
+- `Material.MaterialButton` now supports icon sources and a built-in ripple animation so interactions feel tactile.
+- Material badges live in `Material.MaterialBadge` for lightweight status chips (accented, dense, or outlined).
+- `Material.MaterialBadge` also accepts `iconSource` so you can anchor a micro icon beside the label.
+- Preview the Material view with `qmlscene frontends/qt6/MaterialLanding.qml` or embed it into your Qt Quick application to reuse the tokens and components across other screens.
+- Consult `frontends/qt6/MaterialMapping.md` for a 1:1 mapping between the Material UI components used in `frontends/nextjs` and their QML counterparts (including notes on planned wrappers).
+- New components (Alert, Dialog, Snackbar, IconButton, Circular/Linear progress indicators, Skeleton, Switch) now live in the Material library so the Qt6 interface can reuse key UX patterns directly from the mapping guide.
+- App bar, avatar, typography, link, and paper helpers also live inside `qmllib/Material` so you can scaffold navigation, typography, and layout sections without dropping into raw QtQuick primitives. `Material.MaterialAppBar` and `Material.MaterialToolbar` mimic the MUI AppBar/Toolbar pairing, while `Material.MaterialAvatar`, `Material.MaterialTypography`, `Material.MaterialLink`, and `Material.MaterialPaper` cover the display/style layer.
+- `Material.MaterialBox` adds a lightweight column container with consistent spacing, rounding, and default margins so you can reuse it anywhere a Material `Box` or `Container` would be needed.
+- The Storybook clone in `frontends/qt6/Storybook.qml` showcases the Material components together, supports interactive knobs, and lets designers preview buttons, grids, dialogs, and more in one place.
+- `PackageManager.qml` mimics an Ubuntu Store experience: browse repositories, inspect package metadata, and install/uninstall without exposing raw archives. It is published as the `package-manager` package so the manager itself can be installed just like any other view.
+- Add more packages via JSON manifests under `frontends/qt6/packages/` (e.g., `music_player`, `watchtower`, `escape_room`) to keep the catalog lively and expressive.
+- Procedural MOD assets live under `frontends/qt6/assets/audio`; run `python3 scripts/generate_mod.py` to regenerate the Retro Games theme whenever you want a fresh tracker placeholder.
+- SVG logos for each package live in `frontends/qt6/assets/svg` so you can render branded icons across the Package Manager, Storybook, and other shells.
+- `ModPlayerPanel.qml` (used inside `Storybook.qml`) calls the new C++ `ModPlayer` interface, which depends on `libopenmpt` (now provided through `conan`); you can replay `assets/audio/retro-gaming.mod` via this player and extend it with bespoke trackers.
+- Sample package manifests live in `frontends/qt6/packages/`; they describe dependencies (e.g., `frontpage`, `storybook`, `god_panel`, `supergod_panel`, `forum`, etc.) so the new package manager has context for repo metadata and install flows.
+- The library now also exposes `Material.MaterialGrid`, `Material.MaterialAccordion`, `Material.MaterialCollapse`, `Material.MaterialCheckbox`, `Material.MaterialMenu`, and `Material.MaterialPopover`, plus `Material.MaterialMenuProps`, `Material.MaterialPopoverProps`, and `Material.MaterialDividerProps` to mirror the remaining MUI helpers.
