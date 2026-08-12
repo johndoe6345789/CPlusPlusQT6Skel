@@ -34,7 +34,7 @@ Rectangle {
           desc: "CRUD, user management",
           roleNeeded: 3 },
         { level: 4, name: "God Builder",
-          desc: "Schemas, workflows, Lua",
+          desc: "Schemas, workflows, designer",
           roleNeeded: 4 },
         { level: 5, name: "Super God",
           desc: "Multi-tenant control",

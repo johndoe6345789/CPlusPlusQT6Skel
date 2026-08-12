@@ -16,9 +16,9 @@ Rectangle {
     property int currentTab: 0
     property var configCounts: ({
         schemas: 39, workflows: 12,
-        luaScripts: 8, packages: 62,
+        nodeTypes: 152, packages: 62,
         pages: 27, components: 152,
-        users: 3, snippets: 5,
+        users: 3,
         cssClasses: 44, dropdowns: 16,
         dbBackends: 14
     })

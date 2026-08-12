@@ -70,10 +70,6 @@ MediaJobTable 1.0 MediaJobTable.qml
 MediaRadioTab 1.0 MediaRadioTab.qml
 MediaTvTab 1.0 MediaTvTab.qml
 MediaPluginsTab 1.0 MediaPluginsTab.qml
-LuaScriptSidebar 1.0 LuaScriptSidebar.qml
-LuaCodeEditor 1.0 LuaCodeEditor.qml
-LuaPropertiesPanel 1.0 LuaPropertiesPanel.qml
-LuaOutputPanel 1.0 LuaOutputPanel.qml
 ThemePresetGrid 1.0 ThemePresetGrid.qml
 ThemeColorTokens 1.0 ThemeColorTokens.qml
 ThemeTypography 1.0 ThemeTypography.qml
@@ -114,9 +110,6 @@ CSystemTab 1.0 CSystemTab.qml
 CSuperGodDialogs 1.0 CSuperGodDialogs.qml
 ThemeSpacingEditor 1.0 ThemeSpacingEditor.qml
 ThemeRadiusEditor 1.0 ThemeRadiusEditor.qml
-LuaTestInputPanel 1.0 LuaTestInputPanel.qml
-LuaOutputConsole 1.0 LuaOutputConsole.qml
-LuaSecurityPanel 1.0 LuaSecurityPanel.qml
 CAddDropdownDialog 1.0 CAddDropdownDialog.qml
 CDeleteRecordDialog 1.0 CDeleteRecordDialog.qml
 CGodPanelGuideTab 1.0 CGodPanelGuideTab.qml
@@ -138,7 +131,6 @@ CWorkflowState 1.0 CWorkflowState.qml
 CWorkflowOutputLog 1.0 CWorkflowOutputLog.qml
 CDropdownMenuItem 1.0 CDropdownMenuItem.qml
 MediaPluginCard 1.0 MediaPluginCard.qml
-LuaEditorStatusBar 1.0 LuaEditorStatusBar.qml
 ThemeColorField 1.0 ThemeColorField.qml
 CTransferForm 1.0 CTransferForm.qml
 CServiceConnectionRow 1.0 CServiceConnectionRow.qml
@@ -153,7 +145,6 @@ CMediaJobsTab 1.0 CMediaJobsTab.qml
 CExecutionStatusDot 1.0 CExecutionStatusDot.qml
 CSmtpBodyEditor 1.0 CSmtpBodyEditor.qml
 CRoutePermissionSection 1.0 CRoutePermissionSection.qml
-LuaScriptInfoSection 1.0 LuaScriptInfoSection.qml
 CGodPanelSettingsTab 1.0 CGodPanelSettingsTab.qml
 CModeratorHeader 1.0 CModeratorHeader.qml
 ThemePreviewStatusCard 1.0 ThemePreviewStatusCard.qml

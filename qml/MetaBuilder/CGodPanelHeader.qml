@@ -101,8 +101,8 @@ Rectangle {
                 variant: "primary"
             }
             CChip {
-                text: root.configCounts.luaScripts
-                    + " Lua Scripts"
+                text: root.configCounts.nodeTypes
+                    + " Node Types"
                 variant: "primary"
             }
             CChip {
