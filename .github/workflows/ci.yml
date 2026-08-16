@@ -1,0 +1,120 @@
+# Self-contained: unlike metabuilder's frontends/qt6 (which mounts this
+# repo's QML tree via assemble-workspace), every QML/C++ source this project
+# needs already lives here, so there's nothing to assemble.
+#
+# conanfile.txt asks Conan for qt/6.7.3, and Conan has no prebuilt binary for
+# that configuration, so `conan install --build=missing` would compile Qt
+# from source - hours of runner time and enough disk to exhaust the runner.
+# This workflow instead uses the repo's own download_qt6.py (python/download_qt6/),
+# which fetches the same version as a prebuilt binary via aqtinstall in
+# minutes. Conan itself is not invoked; CMakeLists.txt includes
+# conan_toolchain.cmake with OPTIONAL, so its absence is fine, and Qt is
+# located through CMAKE_PREFIX_PATH instead.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      # Read the version straight from conanfile.txt so this cannot silently
+      # drift from what the project declares.
+      - name: Resolve Qt version from conanfile.txt
+        id: qt
+        run: |
+          version=$(sed -nE 's|^qt/([0-9][0-9.]*).*|\1|p' conanfile.txt | head -1)
+          if [ -z "$version" ]; then
+            echo "Could not read the qt/<version> requirement from conanfile.txt"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Qt version from conanfile.txt: $version"
+
+      # Prebuilt Qt still links against the host's X11/OpenGL/fontconfig
+      # stack. Much smaller than what a source build of Qt would need.
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential ninja-build pkg-config \
+            libgl1-mesa-dev libglu1-mesa-dev libegl1-mesa-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev \
+            libx11-dev libx11-xcb-dev libxcb1-dev libxcb-glx0-dev \
+            libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev \
+            libxcb-randr0-dev libxcb-render-util0-dev libxcb-shape0-dev \
+            libxcb-shm0-dev libxcb-sync-dev libxcb-util-dev \
+            libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-xkb-dev \
+            libfontconfig1-dev libfreetype6-dev
+
+      - name: Cache Qt
+        id: qt_cache
+        uses: actions/cache@v6
+        with:
+          path: third_party/qt6
+          key: qt-${{ runner.os }}-${{ steps.qt.outputs.version }}-linux_gcc_64
+
+      # qtdeclarative (Qt Quick) and qtshadertools match conanfile.txt's
+      # [options] block; download_qt6.py installs aqtinstall itself if
+      # missing.
+      - name: Install Qt
+        if: ${{ steps.qt_cache.outputs.cache-hit != 'true' }}
+        run: |
+          python3 download_qt6.py \
+            --qt-version "${{ steps.qt.outputs.version }}" \
+            --host linux \
+            --modules qtdeclarative qtshadertools
+
+      - name: Locate Qt
+        id: qtdir
+        run: |
+          QT_ROOT=$(find third_party/qt6 -maxdepth 2 -type d -name '*gcc_64' | head -1)
+          if [ -z "$QT_ROOT" ] || [ ! -x "$QT_ROOT/bin/qmake" ]; then
+            echo "Qt installation not found or incomplete under third_party/qt6"
+            find third_party/qt6 -maxdepth 3 -type d | head -20
+            exit 1
+          fi
+          echo "root=$QT_ROOT" >> "$GITHUB_OUTPUT"
+          "$QT_ROOT/bin/qmake" -query QT_VERSION
+
+      # _build rather than build/ to match CMakeUserPresets.json's Conan
+      # generator layout convention.
+      - name: Configure
+        env:
+          QT_ROOT: ${{ steps.qtdir.outputs.root }}
+        run: |
+          cmake -S . -B _build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT"
+
+      - name: Build
+        run: cmake --build _build --parallel "$(nproc)"
+
+      - name: Confirm binary
+        run: |
+          BIN=$(find _build -name metabuilder-qt6 -type f -perm -u+x | head -1)
+          test -n "$BIN" || { echo "metabuilder-qt6 was not produced"; exit 1; }
+          echo "built: $BIN"
+          file "$BIN"
