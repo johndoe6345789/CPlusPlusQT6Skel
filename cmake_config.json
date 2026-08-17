@@ -25,6 +25,11 @@
     "libopenmpt": false,
     "qt_multimedia": false
   },
+  "macos": {
+    "bundle": true,
+    "bundle_name": "MetaBuilder",
+    "identifier": "local.metabuilder.qt6"
+  },
   "compile_definitions": {
     "SRCDIR": "${CMAKE_CURRENT_SOURCE_DIR}"
   }

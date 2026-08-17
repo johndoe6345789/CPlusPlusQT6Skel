@@ -42,6 +42,23 @@ def _scan_dir(directory: str, extensions: tuple[str, ...]) -> list[str]:
     return sorted(result)
 
 
+def find_shared_qml_root(root_dir: Path) -> Optional[Path]:
+    """Locate the shared QML component tree.
+
+    Two layouts are supported: the monorepo one, where this project sits at
+    <repo>/frontends/qt6/ and the components live in <repo>/libraries/qml/, and
+    the standalone one, where the same tree is vendored in as ./qml/.
+    """
+    candidates = [
+        root_dir.parent.parent / "libraries" / "qml",
+        root_dir / "qml",
+    ]
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
 def find_root_qml_files(root_dir: Path) -> list[tuple[str, Optional[str]]]:
     """Find root QML/JS files. Returns (rel_path, alias_or_None) tuples.
 
@@ -54,10 +71,11 @@ def find_root_qml_files(root_dir: Path) -> list[tuple[str, Optional[str]]]:
         if fn.endswith((".qml", ".js")) and os.path.isfile(root_dir / fn):
             result.append((fn, None))
 
-    # Extracted files in ../../libraries/qml/qt6/
+    # Shared tree: qt6/ holds the files that belong at the QRC root
     local_names = {t[0] for t in result}
-    extracted_dir = root_dir.parent.parent / "libraries" / "qml" / "qt6"
-    if extracted_dir.exists():
+    shared_qml = find_shared_qml_root(root_dir)
+    extracted_dir = shared_qml / "qt6" if shared_qml else None
+    if extracted_dir and extracted_dir.exists():
         for fn in sorted(os.listdir(str(extracted_dir))):
             if fn.endswith((".qml", ".js")) and fn not in local_names:
                 rel = os.path.relpath(extracted_dir / fn, root_dir)
@@ -81,9 +99,9 @@ def find_qmllib_files(root_dir: Path) -> dict[str, list[tuple[str, Optional[str]
     if qmllib_dir.exists():
         dirs_to_scan.append((qmllib_dir, "qmllib"))
 
-    # Extracted ../../libraries/qml/{MetaBuilder,Material,dbal}
-    extracted_qml = root_dir.parent.parent / "libraries" / "qml"
-    if extracted_qml.exists():
+    # Shared tree: {MetaBuilder,Material,dbal}
+    extracted_qml = find_shared_qml_root(root_dir)
+    if extracted_qml:
         for module in ["MetaBuilder", "Material", "dbal"]:
             candidate = extracted_qml / module
             if candidate.exists() and not (qmllib_dir / module).exists():
@@ -347,6 +365,32 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
         lines.append(block)
         lines.append("")
 
+    # macOS app bundle — macdeployqt and .dmg packaging both require one
+    macos = config.get("macos", {})
+    if macos.get("bundle", True):
+        lines.append("# macOS: build an .app bundle so macdeployqt can package a .dmg")
+        lines.append("if(APPLE)")
+        lines.append(f'    set_target_properties({proj["executable"]} PROPERTIES')
+        lines.append("        MACOSX_BUNDLE TRUE")
+        lines.append(f'        MACOSX_BUNDLE_BUNDLE_NAME "{macos.get("bundle_name", proj["name"])}"')
+        lines.append(f'        MACOSX_BUNDLE_GUI_IDENTIFIER "{macos.get("identifier", "local." + proj["name"])}"')
+        lines.append(f'        MACOSX_BUNDLE_BUNDLE_VERSION "{proj["version"]}"')
+        lines.append(f'        MACOSX_BUNDLE_SHORT_VERSION_STRING "{proj["version"]}"')
+        lines.append("    )")
+        lines.append("    # The engine reads these from disk at runtime, so copy them into")
+        lines.append("    # Contents/Resources to keep the bundle relocatable.")
+        lines.append(f"    add_custom_command(TARGET {proj['executable']} POST_BUILD")
+        lines.append("        COMMAND ${CMAKE_COMMAND} -E copy_directory")
+        lines.append('            "${CMAKE_CURRENT_SOURCE_DIR}/qml"')
+        lines.append(f'            "$<TARGET_BUNDLE_CONTENT_DIR:{proj["executable"]}>/Resources/qml/QmlComponents"')
+        lines.append("        COMMAND ${CMAKE_COMMAND} -E copy_directory")
+        lines.append('            "${CMAKE_CURRENT_SOURCE_DIR}/packages"')
+        lines.append(f'            "$<TARGET_BUNDLE_CONTENT_DIR:{proj["executable"]}>/Resources/packages"')
+        lines.append("        VERBATIM")
+        lines.append("    )")
+        lines.append("endif()")
+        lines.append("")
+
     # MSVC include path fix
     lines.append("# Conan Qt recipe: propagate CMAKE_INCLUDE_PATH entries for MSVC")
     lines.append("foreach(_inc ${CMAKE_INCLUDE_PATH})")
@@ -369,6 +413,7 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
 
     # Install
     lines.append(f"install(TARGETS {proj['executable']}")
+    lines.append("    BUNDLE  DESTINATION .")
     lines.append("    RUNTIME DESTINATION bin")
     lines.append(")")
     lines.append("")

@@ -19,15 +19,28 @@ int main(int argc, char *argv[]) {
     app.setApplicationName("MetaBuilder");
     QQmlApplicationEngine engine;
 
-    // QML import path: imports/QmlComponents is a symlink to
-    // libraries/qml/ so Qt resolves "import QmlComponents 1.0"
-    // by finding imports/QmlComponents/qmldir.
-    const QString importsDir =
-        QDir::cleanPath(QStringLiteral(SRCDIR)
-                        + QStringLiteral("/imports"));
+    // Runtime data lives in Contents/Resources once deployed, and in the
+    // source tree for a plain build. Prefer the bundle so the .app stays
+    // relocatable; SRCDIR only has to hold up on the machine that built it.
+    const QString resourcesDir =
+        QDir::cleanPath(QCoreApplication::applicationDirPath()
+                        + QStringLiteral("/../Resources"));
+    const bool bundled = QDir(resourcesDir
+                              + QStringLiteral("/packages")).exists();
+
+    // QML import path: the directory holding QmlComponents/qmldir, so Qt
+    // resolves "import QmlComponents 1.0". Bundled builds get a real copy,
+    // source builds go through the imports/QmlComponents symlink.
+    const QString importsDir = QDir::cleanPath(
+        bundled ? resourcesDir + QStringLiteral("/qml")
+                : QStringLiteral(SRCDIR) + QStringLiteral("/imports"));
     if (QDir(importsDir).exists()) {
         engine.addImportPath(importsDir);
     }
+
+    const QString packagesDir = QDir::cleanPath(
+        bundled ? resourcesDir + QStringLiteral("/packages")
+                : QStringLiteral(SRCDIR) + QStringLiteral("/packages"));
 
     PackageRegistry registry;
     ModPlayer modPlayer;
@@ -35,9 +48,7 @@ int main(int argc, char *argv[]) {
     PackageLoader packageLoader;
     NodeRegistry nodeRegistry;
     registry.loadPackage("frontpage");
-    packageLoader.setPackagesDir(
-        QDir(QStringLiteral(SRCDIR) + QStringLiteral("/packages"))
-            .absolutePath());
+    packageLoader.setPackagesDir(QDir(packagesDir).absolutePath());
     packageLoader.scan();
     packageLoader.setWatching(true);
 
