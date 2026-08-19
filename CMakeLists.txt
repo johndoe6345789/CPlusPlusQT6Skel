@@ -690,40 +690,6 @@ if(APPLE)
     set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/assets/icon/MetaBuilder.icns"
         PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     target_sources(metabuilder-qt6 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/assets/icon/MetaBuilder.icns")
-
-    # Sparkle ships a prebuilt framework, not a CMake project, so point
-    # SOURCE_SUBDIR at a path that does not exist to skip add_subdirectory.
-    include(FetchContent)
-    FetchContent_Declare(sparkle
-        URL https://github.com/sparkle-project/Sparkle/releases/download/2.9.6/Sparkle-2.9.6.tar.xz
-        URL_HASH SHA256=52bf9e88cdd972fc0c81501377a880e90d47031bd8ca5462488f843e2609e192
-        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-        SOURCE_SUBDIR sparkle-is-not-a-cmake-project
-    )
-    FetchContent_MakeAvailable(sparkle)
-
-    # @-substitution only, so CMake's own ${MACOSX_BUNDLE_*} placeholders
-    # survive to be filled in when the bundle is assembled.
-    set(SPARKLE_FEED_URL "https://github.com/johndoe6345789/metabuilder/releases/latest/download/appcast.xml")
-    set(SPARKLE_PUBLIC_KEY "6klrXipu1JucAW9+ZUqeVXU3j21A7PLY8s1WTxLXNQM=")
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/Info.plist" @ONLY)
-
-    target_sources(metabuilder-qt6 PRIVATE src/SparkleUpdater.mm)
-    target_compile_definitions(metabuilder-qt6 PRIVATE METABUILDER_SPARKLE=1)
-    target_include_directories(metabuilder-qt6 PRIVATE "${sparkle_SOURCE_DIR}")
-    target_link_libraries(metabuilder-qt6 PRIVATE "${sparkle_SOURCE_DIR}/Sparkle.framework")
-    set_target_properties(metabuilder-qt6 PROPERTIES
-        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_BINARY_DIR}/Info.plist"
-        INSTALL_RPATH "@executable_path/../Frameworks"
-        BUILD_WITH_INSTALL_RPATH TRUE)
-
-    # Sparkle must live inside the bundle it updates.
-    add_custom_command(TARGET metabuilder-qt6 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${sparkle_SOURCE_DIR}/Sparkle.framework"
-            "$<TARGET_BUNDLE_CONTENT_DIR:metabuilder-qt6>/Frameworks/Sparkle.framework"
-        VERBATIM)
     # The engine reads these from disk at runtime, so copy them into
     # Contents/Resources to keep the bundle relocatable.
     add_custom_command(TARGET metabuilder-qt6 POST_BUILD

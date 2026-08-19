@@ -24,7 +24,7 @@
   "features": {
     "libopenmpt": false,
     "qt_multimedia": false,
-    "sparkle": true
+    "sparkle": false
   },
   "macos": {
     "bundle": true,
