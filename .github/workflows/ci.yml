@@ -1,6 +1,7 @@
-# Self-contained: unlike metabuilder's frontends/qt6 (which mounts this
-# repo's QML tree via assemble-workspace), every QML/C++ source this project
-# needs already lives here, so there's nothing to assemble.
+# Self-contained: every QML and C++ source this project needs lives here, so
+# there is nothing to assemble before building. This used to be split, with
+# metabuilder's frontends/qt6 mounting this repo's QML tree; that frontend now
+# lives here and that arrangement is gone.
 #
 # conanfile.txt asks Conan for qt/6.7.3, and Conan has no prebuilt binary for
 # that configuration, so `conan install --build=missing` would compile Qt

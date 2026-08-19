@@ -9,6 +9,7 @@
 #include <QQmlContext>
 #include <QUrl>
 #include <QDir>
+#include <QFileInfo>
 #include <QCoreApplication>
 
 #include "src/PackageRegistry.hpp"
@@ -17,6 +18,7 @@
 #include "src/PackageLoader.h"
 #include "src/NodeRegistry.hpp"
 #include "src/UpdateChecker.h"
+#include "src/ResourceRoot.hpp"
 
 #ifdef METABUILDER_SPARKLE
 #include "src/SparkleUpdater.h"
@@ -53,25 +55,15 @@ int main(int argc, char *argv[]) {
     // was always being killed.
     UpdateChecker updateChecker;
 
-    // Runtime data lives in Contents/Resources once deployed, and in the
-    // source tree for a plain build. Prefer the bundle so the .app stays
-    // relocatable; SRCDIR only has to hold up on the machine that built it.
-    const QString resourcesDir =
-        QDir::cleanPath(QCoreApplication::applicationDirPath()
-                        + QStringLiteral("/../Resources"));
-    const bool bundled = QDir(resourcesDir
-                              + QStringLiteral("/packages")).exists();
-
-    // QML import path: the directory holding QmlComponents/qmldir, so Qt
-    // resolves "import QmlComponents 1.0". Bundled builds get a real copy,
-    // source builds go through the imports/QmlComponents symlink.
-    const QString importsDir = QDir::cleanPath(
-        bundled ? resourcesDir + QStringLiteral("/qml")
-                : QStringLiteral(SRCDIR) + QStringLiteral("/imports"));
-
-    const QString packagesDir = QDir::cleanPath(
-        bundled ? resourcesDir + QStringLiteral("/packages")
-                : QStringLiteral(SRCDIR) + QStringLiteral("/packages"));
+    // Runtime data lives beside the executable in a released build and in the
+    // source tree for a developer build. ResourceRoot resolves both, which
+    // SRCDIR alone cannot: baked in at compile time, it names a path on the
+    // machine that built the binary, so a released app looked for packages on
+    // a CI runner and silently started with none.
+    const QString importsDir =
+        metabuilder::resourcePath(QStringLiteral("imports"));
+    const QString packagesDir =
+        metabuilder::resourcePath(QStringLiteral("packages"));
 
     PackageRegistry registry;
     ModPlayer modPlayer;
@@ -79,19 +71,27 @@ int main(int argc, char *argv[]) {
     PackageLoader packageLoader;
     NodeRegistry nodeRegistry;
     registry.loadPackage("frontpage");
-    packageLoader.setPackagesDir(QDir(packagesDir).absolutePath());
+    if (!packagesDir.isEmpty())
+        packageLoader.setPackagesDir(QDir(packagesDir).absolutePath());
     packageLoader.scan();
     packageLoader.setWatching(true);
 
-    // Load workflow node type registry
-    const QString registryPath = QDir::cleanPath(
-        QStringLiteral(SRCDIR)
-        + QStringLiteral(
-            "/../../workflow/plugins/registry/node-registry.json"));
-    nodeRegistry.loadRegistry(registryPath);
+    // Workflow node types, if present. The path used to be SRCDIR/../../ --
+    // relative to this project's old home inside the metabuilder monorepo --
+    // so standalone it resolved to a sibling of the repo and the app logged a
+    // failure on every start for a file that is not shipped. Look for it
+    // beside the app, allow an override for a developer pointing at a
+    // checkout, and treat absence as normal.
+    QString registryPath =
+        qEnvironmentVariable("METABUILDER_NODE_REGISTRY");
+    if (registryPath.isEmpty())
+        registryPath = metabuilder::resourcePath(QStringLiteral(
+            "workflow/plugins/registry/node-registry.json"));
+    if (!registryPath.isEmpty() && QFileInfo::exists(registryPath))
+        nodeRegistry.loadRegistry(registryPath);
 
     QQmlApplicationEngine engine;
-    if (QDir(importsDir).exists()) {
+    if (!importsDir.isEmpty() && QDir(importsDir).exists()) {
         engine.addImportPath(importsDir);
     }
 
