@@ -7,7 +7,7 @@ Rectangle {
 
     property var nodeData: ({})
     property bool isSelected: false
-    property string groupColorValue: Theme.primary
+    property color groupColorValue: Theme.primary
     property bool drawingConnection: false
     property bool connSourceIsOutput: true
 

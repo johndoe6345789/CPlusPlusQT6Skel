@@ -14,17 +14,17 @@ Rectangle {
 
     property string selectedTheme: "dark"
     property bool hasUnsavedChanges: false
-    property string customPrimary: Theme.primary
-    property string customBackground: Theme.background
-    property string customSurface: Theme.surface
-    property string customPaper: Theme.paper
-    property string customText: Theme.text
-    property string customTextSecondary: Theme.textSecondary
-    property string customBorder: Theme.border
-    property string customError: Theme.error
-    property string customWarning: Theme.warning
-    property string customSuccess: Theme.success
-    property string customInfo: Theme.info
+    property color customPrimary: Theme.primary
+    property color customBackground: Theme.background
+    property color customSurface: Theme.surface
+    property color customPaper: Theme.paper
+    property color customText: Theme.text
+    property color customTextSecondary: Theme.textSecondary
+    property color customBorder: Theme.border
+    property color customError: Theme.error
+    property color customWarning: Theme.warning
+    property color customSuccess: Theme.success
+    property color customInfo: Theme.info
     property string fontFamily: "Inter"
     property int baseFontSize: 14
     property int baseSpacing: 8

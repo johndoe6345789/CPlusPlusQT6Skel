@@ -1,8 +1,8 @@
 {
   "missing-property": 69,
-  "incompatible-type": 14,
+  "incompatible-type": 2,
   "unresolved-type": 9,
   "Quick.layout-positioning": 15,
   "property-override": 31,
-  "unreachable-code": 9
+  "unreachable-code": 0
 }

@@ -143,6 +143,29 @@ def check_infinite_animation_gating() -> None:
                                  "refresh even off-screen")
 
 
+def check_orphaned_return() -> None:
+    """`case "x": return` with the value on the next line returns undefined.
+
+    JavaScript inserts a semicolon after a bare `return`, so the expression
+    below it becomes dead code. CHighlight and CStatBadge each had a whole
+    switch written this way -- every arm returned undefined and their colours
+    silently never applied. The narrow line-wrapping style in this repo makes
+    this easy to introduce; it also split a regex literal once.
+
+    A guard clause (`if (cond)` then `return`) is legitimate and not flagged.
+    """
+    for f in list(qml_files()) + list(js_files()):
+        lines = f.read_text(errors="ignore").splitlines()
+        for i, line in enumerate(lines):
+            if not re.match(r"^\s*(?:case\s.*?:|default:)\s*return\s*$", line):
+                continue
+            nxt = next((l.strip() for l in lines[i + 1:] if l.strip()), "")
+            if nxt and not nxt.startswith(("}", "case ", "default:", "//")):
+                report(f, i + 1, "switch arm returns nothing — the value on the "
+                                 "next line is unreachable (JS inserts a "
+                                 "semicolon after a bare `return`)")
+
+
 def check_quickstyle() -> None:
     """The native Controls styles discard custom background/contentItem, which
     this codebase sets on every button and field."""
@@ -155,6 +178,7 @@ def check_quickstyle() -> None:
 def main() -> int:
     for check in (check_scrollview_contentwidth, check_anchors_inside_card,
                   check_infinite_animation_gating,
+                  check_orphaned_return,
                   check_split_regex, check_relative_config_paths,
                   check_quickstyle):
         check()

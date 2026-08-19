@@ -13,6 +13,8 @@ ColumnLayout {
     id: root
     spacing: 8
 
+    // Theme.current is a theme id ("dark"), not a colour -- it is compared
+    // against themeId, so it must stay a string.
     property string currentTheme: Theme.current
     property bool isDark: Theme.mode === "dark"
 

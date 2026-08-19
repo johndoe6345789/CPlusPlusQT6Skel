@@ -21,14 +21,10 @@ Rectangle {
     // MD3 tonal surface container colors
     readonly property color _bgColor: {
         switch (variant) {
-            case "primary": return
-                Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12)
-            case "success": return
-                Qt.rgba(Theme.success.r, Theme.success.g, Theme.success.b, 0.12)
-            case "warning": return
-                Qt.rgba(Theme.warning.r, Theme.warning.g, Theme.warning.b, 0.12)
-            case "error":   return
-                Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.12)
+            case "primary": return Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12)
+            case "success": return Qt.rgba(Theme.success.r, Theme.success.g, Theme.success.b, 0.12)
+            case "warning": return Qt.rgba(Theme.warning.r, Theme.warning.g, Theme.warning.b, 0.12)
+            case "error":   return Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.12)
             default:        return Theme.surfaceVariant
         }
     }
