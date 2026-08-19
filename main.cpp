@@ -11,12 +11,22 @@
 #include "src/PackageLoader.h"
 #include "src/NodeRegistry.hpp"
 
+#ifdef METABUILDER_SPARKLE
+#include "src/SparkleUpdater.h"
+#endif
+
 int main(int argc, char *argv[]) {
     qputenv("QML_XHR_ALLOW_FILE_READ", "1");
     QGuiApplication app(argc, argv);
     app.setOrganizationName("MetaBuilder");
     app.setOrganizationDomain("metabuilder.local");
     app.setApplicationName("MetaBuilder");
+
+#ifdef METABUILDER_SPARKLE
+    // No-ops unless the bundle carries a feed URL and public key.
+    updater::start();
+#endif
+
     QQmlApplicationEngine engine;
 
     // Runtime data lives in Contents/Resources once deployed, and in the

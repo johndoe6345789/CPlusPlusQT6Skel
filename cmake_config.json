@@ -23,13 +23,20 @@
   },
   "features": {
     "libopenmpt": false,
-    "qt_multimedia": false
+    "qt_multimedia": false,
+    "sparkle": true
   },
   "macos": {
     "bundle": true,
     "bundle_name": "MetaBuilder",
     "identifier": "local.metabuilder.qt6",
-    "icon": "assets/icon/MetaBuilder.icns"
+    "icon": "assets/icon/MetaBuilder.icns",
+    "sparkle": {
+      "version": "2.9.6",
+      "sha256": "52bf9e88cdd972fc0c81501377a880e90d47031bd8ca5462488f843e2609e192",
+      "feed_url": "https://github.com/johndoe6345789/metabuilder/releases/latest/download/appcast.xml",
+      "public_key": "6klrXipu1JucAW9+ZUqeVXU3j21A7PLY8s1WTxLXNQM="
+    }
   },
   "compile_definitions": {
     "SRCDIR": "${CMAKE_CURRENT_SOURCE_DIR}"
