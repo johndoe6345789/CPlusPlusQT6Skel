@@ -24,15 +24,19 @@ Rectangle {
             GradientStop { position: 1.0; color: Qt.rgba(highlightColor.r,
                 highlightColor.g, highlightColor.b, 0) }
         }
-        opacity: animated ? 1 : 0
-        Behavior on x {
-            NumberAnimation {
-                duration: 1100
-                from: -width
-                to: width
-                loops: Animation.Infinite
-                easing.type: Easing.InOutQuad
-            }
+        // The shimmer below loops forever, which repaints the scene at
+        // display refresh for as long as it runs. Skeletons are
+        // placeholders in views that may never be shown, so tie it to
+        // actual visibility rather than leaving it always on.
+        readonly property bool shimmering: animated && visible
+        opacity: shimmering ? 1 : 0
+        NumberAnimation on x {
+            running: parent.shimmering
+            duration: 1100
+            from: -width
+            to: width
+            loops: Animation.Infinite
+            easing.type: Easing.InOutQuad
         }
     }
 }

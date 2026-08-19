@@ -118,6 +118,31 @@ def check_relative_config_paths() -> None:
                              "from qmllib/MetaBuilder")
 
 
+def check_infinite_animation_gating() -> None:
+    """An infinite animation keeps the whole scene graph repainting at display
+    refresh for as long as it runs, whether or not the item is on screen.
+
+    Views here are built eagerly, so an ungated pulse in a view the user never
+    opens costs 120fps forever: that is exactly what one CStatusBadge inside
+    the never-opened God Panel did, holding the app at ~7% CPU while idle.
+    Require `visible` to appear in the running condition.
+    """
+    for f in qml_files():
+        lines = f.read_text(errors="ignore").splitlines()
+        for i, line in enumerate(lines):
+            if "loops: Animation.Infinite" not in line:
+                continue
+            # the running: binding sits within a few lines either side
+            window = "\n".join(lines[max(0, i - 8):i + 4])
+            if "running:" not in window:
+                report(f, i + 1, "infinite animation with no running: condition "
+                                 "— it will repaint forever")
+            elif "visible" not in window:
+                report(f, i + 1, "infinite animation whose running: does not "
+                                 "consider visibility — repaints at display "
+                                 "refresh even off-screen")
+
+
 def check_quickstyle() -> None:
     """The native Controls styles discard custom background/contentItem, which
     this codebase sets on every button and field."""
@@ -129,6 +154,7 @@ def check_quickstyle() -> None:
 
 def main() -> int:
     for check in (check_scrollview_contentwidth, check_anchors_inside_card,
+                  check_infinite_animation_gating,
                   check_split_regex, check_relative_config_paths,
                   check_quickstyle):
         check()

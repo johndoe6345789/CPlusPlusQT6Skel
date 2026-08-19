@@ -97,7 +97,7 @@ Rectangle {
                         font.pixelSize: 16
                         
                         RotationAnimation on rotation {
-                            running: ajaxQueue && ajaxQueue.pending > 0
+                            running: visible && ajaxQueue && ajaxQueue.pending > 0
                             from: 0
                             to: 360
                             duration: 2000
@@ -354,7 +354,7 @@ Rectangle {
                         
                         // Pulse animation for pending
                         SequentialAnimation on opacity {
-                            running: model.status === "pending"
+                            running: visible && model.status === "pending"
                             loops: Animation.Infinite
                             NumberAnimation { to: 0.4; duration: 500 }
                             NumberAnimation { to: 1.0; duration: 500 }

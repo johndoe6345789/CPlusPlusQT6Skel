@@ -76,7 +76,11 @@ Rectangle {
 
             // Pulse animation for running/active status
             SequentialAnimation on opacity {
-                running: badge._semantic === "info" && badge.showDot
+                // Gate on visibility too: an infinite animation keeps the whole
+                // scene graph repainting at display refresh even when the
+                // item is off-screen, and eagerly-built views are never shown.
+                running: badge.visible && badge._semantic === "info"
+                    && badge.showDot
                 loops: Animation.Infinite
                 NumberAnimation { to: 0.3; duration: 600
                 easing.type: Easing.InOutSine }

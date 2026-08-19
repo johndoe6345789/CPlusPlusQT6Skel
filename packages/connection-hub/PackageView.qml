@@ -121,7 +121,7 @@ Rectangle {
                             color: healthColor(modelData.health)
 
                             SequentialAnimation on opacity {
-                                running: root.testingAll
+                                running: visible && root.testingAll
                                 loops: Animation.Infinite
                                 NumberAnimation { to: 0.3; duration: 400 }
                                 NumberAnimation { to: 1.0; duration: 400 }
