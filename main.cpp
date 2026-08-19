@@ -1,5 +1,9 @@
 #include <QGuiApplication>
 #include <QIcon>
+#include <QQuickWindow>
+#include <QTimer>
+#include <QCommandLineParser>
+#include <QImage>
 #include <QQuickStyle>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -41,13 +45,13 @@ int main(int argc, char *argv[]) {
     updater::start();
 #endif
 
-    QQmlApplicationEngine engine;
-
-    // Exposed to QML as UpdateCheck. Inert on a source build.
+    // Everything exposed to QML must outlive the engine. C++ destroys locals
+    // in reverse declaration order, so the engine is declared *after* them --
+    // otherwise teardown destroys the context objects first and any binding
+    // still referencing them evaluates against a dangling pointer. That only
+    // shows up on a clean quit, which is why it stayed hidden while the app
+    // was always being killed.
     UpdateChecker updateChecker;
-    engine.rootContext()->setContextProperty(
-        QStringLiteral("UpdateCheck"), &updateChecker);
-    updateChecker.check();
 
     // Runtime data lives in Contents/Resources once deployed, and in the
     // source tree for a plain build. Prefer the bundle so the .app stays
@@ -64,9 +68,6 @@ int main(int argc, char *argv[]) {
     const QString importsDir = QDir::cleanPath(
         bundled ? resourcesDir + QStringLiteral("/qml")
                 : QStringLiteral(SRCDIR) + QStringLiteral("/imports"));
-    if (QDir(importsDir).exists()) {
-        engine.addImportPath(importsDir);
-    }
 
     const QString packagesDir = QDir::cleanPath(
         bundled ? resourcesDir + QStringLiteral("/packages")
@@ -89,19 +90,78 @@ int main(int argc, char *argv[]) {
             "/../../workflow/plugins/registry/node-registry.json"));
     nodeRegistry.loadRegistry(registryPath);
 
+    QQmlApplicationEngine engine;
+    if (QDir(importsDir).exists()) {
+        engine.addImportPath(importsDir);
+    }
+
     auto *ctx = engine.rootContext();
+    ctx->setContextProperty(QStringLiteral("UpdateCheck"),     &updateChecker);
     ctx->setContextProperty(QStringLiteral("PackageRegistry"), &registry);
     ctx->setContextProperty(QStringLiteral("ModPlayer"),       &modPlayer);
     ctx->setContextProperty(QStringLiteral("DBALClient"),      &dbalClient);
     ctx->setContextProperty(QStringLiteral("PackageLoader"),   &packageLoader);
     ctx->setContextProperty(QStringLiteral("NodeRegistry"),    &nodeRegistry);
 
+    // --capture drives the visual regression harness: render one view at a
+    // fixed size, write a PNG, exit. Pair it with QT_QUICK_BACKEND=software
+    // and QT_QPA_PLATFORM=offscreen so output is deterministic and headless --
+    // GPU rasterisation differs between machines, which would make image
+    // comparison useless.
+    QString captureView, capturePath;
+    QSize captureSize(1360, 860);
+    for (int i = 1; i < argc; ++i) {
+        const QString arg = QString::fromLocal8Bit(argv[i]);
+        if (arg.startsWith(QStringLiteral("--capture-view=")))
+            captureView = arg.section(QLatin1Char('='), 1);
+        else if (arg.startsWith(QStringLiteral("--capture-out=")))
+            capturePath = arg.section(QLatin1Char('='), 1);
+        else if (arg.startsWith(QStringLiteral("--capture-size="))) {
+            const QString v = arg.section(QLatin1Char('='), 1);
+            captureSize = QSize(v.section(QLatin1Char('x'), 0, 0).toInt(),
+                                v.section(QLatin1Char('x'), 1, 1).toInt());
+        }
+    }
+    const bool capturing = !capturePath.isEmpty();
+
     const QUrl url(QStringLiteral("qrc:/qt/qml/DBALObservatory/App.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject *obj, const QUrl &objUrl) {
-                         if (!obj && objUrl == url)
+                     &app, [url, capturing, captureView, capturePath,
+                            captureSize](QObject *obj, const QUrl &objUrl) {
+                         if (!obj && objUrl == url) {
                              QCoreApplication::exit(-1);
+                             return;
+                         }
+                         if (!capturing || objUrl != url)
+                             return;
+
+                         auto *window = qobject_cast<QQuickWindow *>(obj);
+                         if (!window) {
+                             qWarning("capture: root is not a QQuickWindow");
+                             QCoreApplication::exit(2);
+                             return;
+                         }
+                         window->resize(captureSize);
+                         if (!captureView.isEmpty())
+                             window->setProperty("currentView", captureView);
+
+                         // Let bindings settle and the scene render before
+                         // grabbing; a single event-loop turn is not enough
+                         // for layouts that size themselves from content.
+                         QTimer::singleShot(1500, window,
+                                            [window, capturePath]() {
+                             const QImage shot = window->grabWindow();
+                             if (shot.isNull() || !shot.save(capturePath)) {
+                                 qWarning("capture: failed to write %s",
+                                          qPrintable(capturePath));
+                                 QCoreApplication::exit(3);
+                                 return;
+                             }
+                             QCoreApplication::quit();
+                         });
                      }, Qt::QueuedConnection);
+
+    updateChecker.check();
 
     engine.load(url);
     return app.exec();

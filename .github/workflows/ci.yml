@@ -151,6 +151,15 @@ jobs:
       - name: Build
         run: cmake --build _build --parallel "$(nproc)"
 
+      - name: Visual regression
+        # Skips cleanly when this platform has no references committed yet.
+        # References are per-OS because font rasterisation differs; generate
+        # Linux ones on a runner with --update-refs to turn this into a gate.
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 scripts/visual-regression.py \
+            --app build/metabuilder-qt6 || exit 1
+
       - name: Confirm binary
         run: |
           BIN=$(find _build -name metabuilder-qt6 -type f -perm -u+x | head -1)

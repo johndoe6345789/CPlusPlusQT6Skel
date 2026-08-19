@@ -117,7 +117,12 @@ Rectangle {
             // ── Product Grid ──
             GridLayout {
                 Layout.fillWidth: true
-                columns: 3
+                // A product card needs ~220px before its name and its
+                // "Add to Cart" button start clipping, so derive the column
+                // count from the available width instead of fixing it at 3 --
+                // at phone width three columns overflow the window entirely.
+                columns: Math.max(1, Math.min(3,
+                    Math.floor(width / 220)))
                 columnSpacing: 12
                 rowSpacing: 12
 
