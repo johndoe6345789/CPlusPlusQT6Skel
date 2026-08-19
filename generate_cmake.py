@@ -204,6 +204,25 @@ def find_qmllib_files(root_dir: Path,
     return result
 
 
+def find_component_tree_files(root_dir: Path, rel: str) -> list[str]:
+    """Every file of the shared component tree, for embedding in the QRC.
+
+    These are currently copied into the bundle after linking and loaded from
+    disk, which means they are not build inputs: editing one does not trigger
+    a rebuild and the bundle silently keeps the previous version.
+    """
+    base = root_dir / rel
+    if not base.exists():
+        return []
+    out = []
+    for p in sorted(base.rglob("*")):
+        if p.is_dir() or p.name.startswith("."):
+            continue
+        if p.suffix in (".qml", ".js") or p.name == "qmldir":
+            out.append(str(p.relative_to(root_dir)))
+    return out
+
+
 def find_package_qml_files(root_dir: Path) -> list[str]:
     """Find all *.qml and *.js files in packages/ subdirectories."""
     packages_dir = root_dir / PATHS["packages"]
@@ -463,6 +482,24 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
         out += [")", ""]
         return out
 
+    def component_tree():
+        rel = PATHS.get("component_tree", "qml")
+        files = find_component_tree_files(root_dir, rel)
+        if not files:
+            return []
+        out = ["# Shared component tree, embedded so `import QmlComponents 1.0`",
+               "# resolves from the binary. Placed under /qt/qml, which the engine",
+               "# already has on its import path, so the module is found without a",
+               "# disk copy -- that copy was not a build input, so editing a",
+               "# component did not trigger a rebuild.",
+               f'qt_add_resources({proj["executable"]} "component_tree"',
+               '    PREFIX "/qt/qml/QmlComponents"',
+               f'    BASE "{rel}"',
+               "    FILES"]
+        out += [f"        {f}" for f in files]
+        out += [")", ""]
+        return out
+
     def svg_resources():
         if not svg_assets:
             return []
@@ -516,12 +553,13 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
             "feed_url": sparkle.get("feed_url", ""),
             "public_key": sparkle.get("public_key", ""),
         }))
-        out += ["    # The engine reads these from disk at runtime, so copy them into",
-                "    # Contents/Resources to keep the bundle relocatable.",
+        # packages/ stays on disk: PackageLoader watches it and hot-reloads
+        # package views at runtime. The component tree no longer needs copying
+        # -- it is compiled into the QRC, so there is one copy rather than two
+        # that can drift.
+        out += ["    # Package views are read from disk at runtime so they can be",
+                "    # installed and hot-reloaded; copy them into the bundle.",
                 f"    add_custom_command(TARGET {proj['executable']} POST_BUILD",
-                "        COMMAND ${CMAKE_COMMAND} -E copy_directory",
-                '            "${CMAKE_CURRENT_SOURCE_DIR}/qml"',
-                f'            "$<TARGET_BUNDLE_CONTENT_DIR:{proj["executable"]}>/Resources/qml/QmlComponents"',
                 "        COMMAND ${CMAKE_COMMAND} -E copy_directory",
                 '            "${CMAKE_CURRENT_SOURCE_DIR}/packages"',
                 f'            "$<TARGET_BUNDLE_CONTENT_DIR:{proj["executable"]}>/Resources/packages"',
@@ -557,6 +595,7 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
         "find_qt": find_qt, "executable": executable,
         "compile_definitions": compile_definitions,
         "resource_aliases": resource_aliases, "qml_module": qml_module,
+        "component_tree": component_tree,
         "svg_resources": svg_resources, "link_libraries": link_libraries,
         "features": features_block, "macos_bundle": macos_bundle,
         "msvc_include_path": msvc_include_path, "finalize": finalize,

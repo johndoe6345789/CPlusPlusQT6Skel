@@ -120,10 +120,14 @@ Rectangle {
         }
 
         GridLayout {
-            Layout.fillWidth: true
+            // Only stretch when the buttons are stacked. Filling the width in
+            // row mode makes the grid span the hero while its content-sized
+            // columns pack to the left, so the row sits left of centre even
+            // though each button centres inside its own cell -- align the
+            // grid itself instead.
+            Layout.fillWidth: root.compact
+            Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: root.compact ? 12 : 20
-            // Stack into a single full-width column rather than letting the
-            // row run off the edge.
             columns: root.compact ? 1 : 3
             columnSpacing: 12
             rowSpacing: 8
