@@ -11,6 +11,10 @@ ApplicationWindow {
     id: appWindow
     objectName: "appWindow"
     visible: true; width: 1400; height: 900
+    // Floor matches the narrowest layout the views are designed for;
+    // below this the grids have nowhere left to reflow to.
+    minimumWidth: 360
+    minimumHeight: 480
     title: "MetaBuilder Observatory"
     color: Theme.background
 

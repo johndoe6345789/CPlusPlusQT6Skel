@@ -1,4 +1,5 @@
 #include <QGuiApplication>
+#include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
@@ -21,6 +22,9 @@ int main(int argc, char *argv[]) {
     app.setOrganizationName("MetaBuilder");
     app.setOrganizationDomain("metabuilder.local");
     app.setApplicationName("MetaBuilder");
+    // Window/taskbar icon. macOS uses the bundle's .icns instead, but this is
+    // what Linux and Windows read, and it also covers an unbundled build.
+    app.setWindowIcon(QIcon(QStringLiteral(":/appicon-256.png")));
 
 #ifdef METABUILDER_SPARKLE
     // No-ops unless the bundle carries a feed URL and public key.

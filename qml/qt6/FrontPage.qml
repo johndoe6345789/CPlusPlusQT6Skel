@@ -36,7 +36,10 @@ Rectangle {
             width: parent.width; spacing: 0
             Item { Layout.preferredHeight: 8 }
             CHeroSection {
-                Layout.fillWidth: true; Layout.preferredHeight: 400
+                Layout.fillWidth: true
+                // The hero sizes itself: at narrow widths the CTAs
+                // stack and it needs more than the desktop 400.
+                Layout.preferredHeight: implicitHeight
                 platformVersion: root.platformVersion; isDark: root.isDark
                 onGetStarted: appWindow.currentView = "login"
                 onOpenStorybook: appWindow.currentView = "storybook"

@@ -652,6 +652,31 @@ target_link_libraries(metabuilder-qt6 PRIVATE
     Qt6::Core Qt6::Gui Qt6::Quick Qt6::Qml Qt6::Network
 )
 
+# Application icon
+qt_add_resources(metabuilder-qt6 "app_icon"
+    PREFIX "/"
+    BASE "assets/icon"
+    FILES assets/icon/appicon-256.png
+)
+
+if(WIN32)
+    set(APP_ICON_ICO "${CMAKE_CURRENT_SOURCE_DIR}/assets/icon/MetaBuilder.ico")
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/app.rc.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/app.rc" @ONLY)
+    target_sources(metabuilder-qt6 PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/app.rc")
+endif()
+
+if(UNIX AND NOT APPLE)
+    # Freedesktop icon theme layout: hicolor/<size>x<size>/apps/<Icon>.png
+    foreach(_sz 16 22 24 32 48 64 128 256 512)
+        install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/assets/icon/linux/metabuilder-${_sz}.png"
+            DESTINATION "share/icons/hicolor/${_sz}x${_sz}/apps"
+            RENAME "metabuilder.png")
+    endforeach()
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/metabuilder.desktop"
+        DESTINATION "share/applications")
+endif()
+
 # macOS: build an .app bundle so macdeployqt can package a .dmg
 if(APPLE)
     set_target_properties(metabuilder-qt6 PROPERTIES

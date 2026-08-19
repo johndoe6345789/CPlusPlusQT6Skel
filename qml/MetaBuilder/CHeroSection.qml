@@ -26,8 +26,17 @@ Rectangle {
     readonly property color onSurface: Theme.text
     readonly property color onSurfaceVariant: Theme.textSecondary
 
+    // Below this the three call-to-action buttons no longer fit on one row
+    // and the 52px display type overflows the window.
+    readonly property bool compact: width < 640
+
     color: "transparent"
-    implicitHeight: 400
+    // Height has to follow the content once things stack, otherwise the
+    // buttons are pushed outside the section and get clipped by the strip
+    // below. Keep the roomy fixed height on desktop.
+    implicitHeight: compact
+        ? content.implicitHeight + 48
+        : 400
 
     Rectangle {
         anchors.fill: parent; gradient: Gradient {
@@ -47,11 +56,18 @@ Rectangle {
     } }
 
     ColumnLayout {
+        id: content
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: 16
-        width: Math.min(parent.width - 80, 720)
-        spacing: 16
+        // Centring a content-sized column lets it spill past the section's
+        // top edge, where the ScrollView clips it. Pin to the top instead
+        // once the section is only as tall as its content.
+        anchors.top: root.compact ? parent.top : undefined
+        anchors.topMargin: root.compact ? 24 : 0
+        anchors.verticalCenter: root.compact
+            ? undefined : parent.verticalCenter
+        anchors.verticalCenterOffset: root.compact ? 0 : 16
+        width: Math.min(parent.width - (root.compact ? 32 : 80), 720)
+        spacing: root.compact ? 12 : 16
 
         CVersionPill {
             Layout.alignment: Qt.AlignHCenter
@@ -62,11 +78,14 @@ Rectangle {
 
         CText {
             text: "MetaBuilder"
-            font.pixelSize: 52
+            // Scale with the window instead of clipping; the lower bound
+            // keeps it legible on a phone, the upper keeps the desktop look.
+            font.pixelSize: Math.max(30, Math.min(52, root.width * 0.11))
             font.weight: Font.Black
-            font.letterSpacing: -2
+            font.letterSpacing: root.compact ? -1 : -2
             color: onSurface
             Layout.fillWidth: true
+            wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
         }
 
@@ -74,32 +93,46 @@ Rectangle {
             text: "The universal platform for"
                 + " building data-driven"
                 + " applications."
-            font.pixelSize: 17
+            font.pixelSize: root.compact ? 15 : 17
             color: onSurfaceVariant
             Layout.fillWidth: true
+            wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
         }
 
         CText {
-            text: "95% JSON config  \u00B7  "
-                + "5% infrastructure  \u00B7  "
-                + "Desktop + Web + CLI"
-            font.pixelSize: 13
+            // The interpuncts read as one long unbreakable run on a narrow
+            // screen, so break onto separate lines instead of overflowing.
+            text: root.compact
+                ? "95% JSON config\n"
+                    + "5% infrastructure\n"
+                    + "Desktop + Web + CLI"
+                : "95% JSON config  ·  "
+                    + "5% infrastructure  ·  "
+                    + "Desktop + Web + CLI"
+            font.pixelSize: root.compact ? 12 : 13
             font.family: "monospace"
             color: onSurfaceVariant
             opacity: isDark ? 0.4 : 0.55
             Layout.fillWidth: true
+            wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
         }
 
-        RowLayout {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 20
-            spacing: 12
+        GridLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: root.compact ? 12 : 20
+            // Stack into a single full-width column rather than letting the
+            // row run off the edge.
+            columns: root.compact ? 1 : 3
+            columnSpacing: 12
+            rowSpacing: 8
 
             CButton {
                 text: "Get Started"
                 variant: "primary"; size: "lg"
+                Layout.fillWidth: root.compact
+                Layout.alignment: Qt.AlignHCenter
                 activeFocusOnTab: true
                 Accessible.role: Accessible.Button
                 Accessible.name: "Get Started"
@@ -110,6 +143,8 @@ Rectangle {
             CButton {
                 text: "Storybook"
                 variant: "ghost"; size: "lg"
+                Layout.fillWidth: root.compact
+                Layout.alignment: Qt.AlignHCenter
                 activeFocusOnTab: true
                 Accessible.role: Accessible.Button
                 Accessible.name: "Open Storybook"
@@ -122,6 +157,8 @@ Rectangle {
             CButton {
                 text: "Packages"
                 variant: "ghost"; size: "lg"
+                Layout.fillWidth: root.compact
+                Layout.alignment: Qt.AlignHCenter
                 activeFocusOnTab: true
                 Accessible.role: Accessible.Button
                 Accessible.name: "Open Packages"

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=MetaBuilder
+GenericName=Application Builder
+Comment=The universal platform for building data-driven applications
+Exec=metabuilder-qt6
+Icon=metabuilder
+Terminal=false
+Categories=Development;IDE;
+Keywords=qml;builder;dbal;low-code;
+StartupNotify=true
+StartupWMClass=metabuilder-qt6

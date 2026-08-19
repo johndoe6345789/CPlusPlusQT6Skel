@@ -14,14 +14,23 @@ Rectangle {
     readonly property color outlineVariant: isDark
         ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(0, 0, 0, 0.08)
 
-    implicitHeight: 88
+    // A value and its label sit side by side in roughly 150px. With the 60px
+    // side margins that means four across needs ~720px; below that the cells
+    // start eliding the numbers themselves ("1,2... USE...") which is worse
+    // than wrapping. Reflow to 2x2 and stack each value over its label.
+    readonly property bool compact: width < 720
+    readonly property int columnCount: compact ? 2 : 4
+
+    implicitHeight: compact ? 148 : 88
     color: isDark ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0.31, 0.31, 0.44, 0.06)
 
-    RowLayout {
+    GridLayout {
         anchors.fill: parent
-        anchors.leftMargin: 60
-        anchors.rightMargin: 60
-        spacing: 0
+        anchors.leftMargin: compact ? 12 : 60
+        anchors.rightMargin: compact ? 12 : 60
+        columns: root.columnCount
+        columnSpacing: 0
+        rowSpacing: 0
 
         Repeater {
             model: [
@@ -34,28 +43,42 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                RowLayout {
+                GridLayout {
                     anchors.centerIn: parent
-                    spacing: 10
+                    width: parent.width - 8
+                    columns: root.compact ? 1 : 2
+                    columnSpacing: 10
+                    rowSpacing: 1
 
                     CText {
                         text: modelData.value
-                        font.pixelSize: 24
+                        font.pixelSize: root.compact ? 20 : 24
                         font.weight: Font.Bold
                         font.family: "monospace"
                         color: root.accentColor
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                        horizontalAlignment: root.compact
+                            ? Text.AlignHCenter : Text.AlignRight
                     }
                     CText {
                         text: modelData.label
                         font.pixelSize: 10
                         font.family: "monospace"
-                        font.letterSpacing: 2
+                        font.letterSpacing: root.compact ? 1 : 2
                         color: onSurfaceVariant
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                        horizontalAlignment: root.compact
+                            ? Text.AlignHCenter : Text.AlignLeft
                     }
                 }
 
+                // Divider between columns only -- never after the last cell
+                // in a row, or it hangs off the edge of the strip.
                 Rectangle {
-                    visible: index < 3
+                    visible: (index % root.columnCount)
+                        < root.columnCount - 1
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     width: 1

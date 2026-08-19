@@ -365,6 +365,40 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
         lines.append(block)
         lines.append("")
 
+    # Application icon: macOS gets the .icns through the bundle below; Windows
+    # needs an ICON resource compiled into the exe, Linux needs hicolor PNGs
+    # plus a .desktop entry, and every platform gets a runtime window icon so
+    # the taskbar/dock shows something even for a plain (unbundled) build.
+    icon_cfg = config.get("icon", {})
+    if icon_cfg.get("runtime_png"):
+        lines.append("# Application icon")
+        lines.append(f'qt_add_resources({proj["executable"]} "app_icon"')
+        lines.append('    PREFIX "/"')
+        lines.append('    BASE "assets/icon"')
+        lines.append(f'    FILES {icon_cfg["runtime_png"]}')
+        lines.append(")")
+        lines.append("")
+    if icon_cfg.get("ico"):
+        lines.append("if(WIN32)")
+        lines.append(f'    set(APP_ICON_ICO "${{CMAKE_CURRENT_SOURCE_DIR}}/{icon_cfg["ico"]}")')
+        lines.append('    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/app.rc.in"')
+        lines.append('        "${CMAKE_CURRENT_BINARY_DIR}/app.rc" @ONLY)')
+        lines.append(f'    target_sources({proj["executable"]} PRIVATE "${{CMAKE_CURRENT_BINARY_DIR}}/app.rc")')
+        lines.append("endif()")
+        lines.append("")
+    if icon_cfg.get("linux_dir"):
+        lines.append("if(UNIX AND NOT APPLE)")
+        lines.append("    # Freedesktop icon theme layout: hicolor/<size>x<size>/apps/<Icon>.png")
+        lines.append("    foreach(_sz 16 22 24 32 48 64 128 256 512)")
+        lines.append(f'        install(FILES "${{CMAKE_CURRENT_SOURCE_DIR}}/{icon_cfg["linux_dir"]}/metabuilder-${{_sz}}.png"')
+        lines.append('            DESTINATION "share/icons/hicolor/${_sz}x${_sz}/apps"')
+        lines.append('            RENAME "metabuilder.png")')
+        lines.append("    endforeach()")
+        lines.append('    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/metabuilder.desktop"')
+        lines.append('        DESTINATION "share/applications")')
+        lines.append("endif()")
+        lines.append("")
+
     # macOS app bundle — macdeployqt and .dmg packaging both require one
     macos = config.get("macos", {})
     if macos.get("bundle", True):

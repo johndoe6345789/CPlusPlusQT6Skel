@@ -40,5 +40,12 @@
   },
   "compile_definitions": {
     "SRCDIR": "${CMAKE_CURRENT_SOURCE_DIR}"
+  },
+  "icon": {
+    "svg": "assets/icon/appicon.svg",
+    "icns": "assets/icon/MetaBuilder.icns",
+    "ico": "assets/icon/MetaBuilder.ico",
+    "linux_dir": "assets/icon/linux",
+    "runtime_png": "assets/icon/appicon-256.png"
   }
 }
