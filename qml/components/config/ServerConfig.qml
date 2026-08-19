@@ -26,7 +26,7 @@ QtObject {
         // app instead and every DBAL call 404s, which reads as "offline".
         "http://localhost:8080/api/dbal",
         "http://127.0.0.1:8080/api/dbal",
-        "http://localhost:8080"
+        "https://metabuilder.wardcrew.com/api/dbal"
     ]
 
     property string url: presets[0]
