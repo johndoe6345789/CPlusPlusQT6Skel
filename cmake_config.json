@@ -171,5 +171,36 @@
         "        VERBATIM)"
       ]
     }
-  }
+  },
+  "cmake_pipeline": [
+    "header",
+    "project",
+    "msvc_cplusplus",
+    "conan_toolchain",
+    "find_qt",
+    "executable",
+    "compile_definitions",
+    "resource_aliases",
+    "qml_module",
+    "svg_resources",
+    "link_libraries",
+    "features",
+    {
+      "block": "update_channel"
+    },
+    {
+      "block": "icon_runtime"
+    },
+    {
+      "block": "icon_windows"
+    },
+    {
+      "block": "icon_linux"
+    },
+    "macos_bundle",
+    "msvc_include_path",
+    "finalize",
+    "ninja_warning",
+    "install"
+  ]
 }
