@@ -50,8 +50,8 @@ CCard {
                 }
 
                 Rectangle {
-                    width: resLabel.implicitWidth + 16
-                    height: 24
+                    Layout.preferredWidth: resLabel.implicitWidth + 16
+                    Layout.preferredHeight: 24
                     radius: 4
                     color: channel
                         ? resolutionColor(

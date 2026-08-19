@@ -24,8 +24,8 @@ Rectangle {
         spacing: 8
 
         Rectangle {
-            width: 6
-            height: 24
+            Layout.preferredWidth: 6
+            Layout.preferredHeight: 24
             radius: 3
             color: root.accentColor
         }

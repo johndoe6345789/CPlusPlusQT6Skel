@@ -47,7 +47,7 @@ Rectangle {
         
         Rectangle {
             Layout.fillWidth: true
-            height: 1
+            Layout.preferredHeight: 1
             color: "#2d2d2d"
         }
         
@@ -109,7 +109,7 @@ Rectangle {
         
         Rectangle {
             Layout.fillWidth: true
-            height: 1
+            Layout.preferredHeight: 1
             color: "#2d2d2d"
             visible: footerLoader.item
         }

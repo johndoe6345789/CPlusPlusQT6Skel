@@ -57,7 +57,7 @@ Dialog {
         // Title bar
         Rectangle {
             Layout.fillWidth: true
-            height: 48
+            Layout.preferredHeight: 48
             color: Theme.surface
             
             Text {
@@ -190,8 +190,8 @@ Dialog {
                             
                             // Status badge
                             Rectangle {
-                                width: 8
-                                height: 8
+                                Layout.preferredWidth: 8
+                                Layout.preferredHeight: 8
                                 radius: 4
                                 color: status === "completed" ? Theme.success :
                                        status === "running" ? Theme.primary :

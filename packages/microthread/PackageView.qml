@@ -184,8 +184,8 @@ Rectangle {
 
                             // Avatar circle
                             Rectangle {
-                                width: 40
-                                height: 40
+                                Layout.preferredWidth: 40
+                                Layout.preferredHeight: 40
                                 radius: 20
                                 color: model.avatarColor
 

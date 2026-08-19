@@ -144,8 +144,8 @@ Rectangle {
 
                         // Timer
                         Rectangle {
-                            width: 90
-                            height: 36
+                            Layout.preferredWidth: 90
+                            Layout.preferredHeight: 36
                             radius: 8
                             color: Theme.card
                             border.color: Theme.border
@@ -314,7 +314,7 @@ Rectangle {
                                 model: root.inventory
                                 CListItem {
                                     Layout.fillWidth: true
-                                    text: modelData
+                                    title: modelData
                                 }
                             }
                         }

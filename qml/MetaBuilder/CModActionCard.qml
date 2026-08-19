@@ -33,8 +33,8 @@ Rectangle {
         spacing: 12
 
         Rectangle {
-            width: 4
-            height: 28
+            Layout.preferredWidth: 4
+            Layout.preferredHeight: 28
             radius: 2
             color: root._a.action === "Deleted" ? "#F43F5E" :
                    root._a.action === "Warned" ? "#F59E0B" :

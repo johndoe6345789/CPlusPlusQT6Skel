@@ -12,8 +12,8 @@ RowLayout {
     signal colorEdited(string val)
 
     Rectangle {
-        width: 32
-        height: 32
+        Layout.preferredWidth: 32
+        Layout.preferredHeight: 32
         radius: 6
         color: root.colorValue
         border.width: 1

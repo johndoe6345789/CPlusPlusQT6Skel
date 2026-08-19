@@ -248,7 +248,7 @@ Rectangle {
                         }
                         Rectangle {
                             Layout.fillWidth: true
-                            height: 10
+                            Layout.preferredHeight: 10
                             radius: 5
                             color: Theme.border
                             Rectangle {
@@ -274,7 +274,7 @@ Rectangle {
                         }
                         Rectangle {
                             Layout.fillWidth: true
-                            height: 10
+                            Layout.preferredHeight: 10
                             radius: 5
                             color: Theme.border
                             Rectangle {
@@ -300,7 +300,7 @@ Rectangle {
                         }
                         Rectangle {
                             Layout.fillWidth: true
-                            height: 10
+                            Layout.preferredHeight: 10
                             radius: 5
                             color: Theme.border
                             Rectangle {
@@ -349,8 +349,8 @@ Rectangle {
 
                             // Severity dot
                             Rectangle {
-                                width: 10
-                                height: 10
+                                Layout.preferredWidth: 10
+                                Layout.preferredHeight: 10
                                 radius: 5
                                 color: severityColor(model.severity)
                                 Layout.alignment: Qt.AlignVCenter

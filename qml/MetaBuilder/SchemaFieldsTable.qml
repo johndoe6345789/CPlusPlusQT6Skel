@@ -45,7 +45,7 @@ CCard {
 
         Rectangle {
             Layout.fillWidth: true
-            height: 36
+            Layout.preferredHeight: 36
             color: Theme.surface
             radius: 4
 

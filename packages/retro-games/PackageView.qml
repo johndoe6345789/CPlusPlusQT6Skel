@@ -190,10 +190,9 @@ Rectangle {
 
                             // Rank medal
                             Rectangle {
-                                width: 28
-                                height: 28
+                                Layout.preferredWidth: 28
+                                Layout.preferredHeight: 28
                                 radius: 14
-                                Layout.preferredWidth: 50
                                 color: modelData.rank === 1 ? "#f1c40f" : modelData.rank === 2 ? "#bdc3c7" : modelData.rank === 3 ? "#cd7f32" : "transparent"
                                 border.color: Theme.border
                                 border.width: modelData.rank > 3 ? 1 : 0

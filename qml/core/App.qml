@@ -245,7 +245,7 @@ ApplicationWindow {
                 // Theme selector
                 ItemDelegate {
                     Layout.fillWidth: true
-                    height: 48
+                    Layout.preferredHeight: 48
                     
                     contentItem: RowLayout {
                         spacing: 16
@@ -294,7 +294,7 @@ ApplicationWindow {
                 // Language selector
                 ItemDelegate {
                     Layout.fillWidth: true
-                    height: 48
+                    Layout.preferredHeight: 48
                     
                     contentItem: RowLayout {
                         spacing: 16

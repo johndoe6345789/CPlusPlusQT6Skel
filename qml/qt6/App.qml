@@ -59,7 +59,7 @@ ApplicationWindow {
                 font.letterSpacing: -0.5
             }
             Rectangle {
-                width: 6; height: 6; radius: 3
+                Layout.preferredWidth: 6; height: 6; radius: 3
                 color: dbalProvider.connected
                     ? "#22C55E" : "#F43F5E"
                 Layout.leftMargin: 2

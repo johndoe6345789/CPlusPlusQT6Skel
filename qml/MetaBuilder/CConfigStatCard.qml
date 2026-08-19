@@ -33,8 +33,8 @@ Rectangle {
         spacing: 10
 
         Rectangle {
-            width: 4
-            height: 32
+            Layout.preferredWidth: 4
+            Layout.preferredHeight: 32
             radius: 2
             color: root.accent
         }

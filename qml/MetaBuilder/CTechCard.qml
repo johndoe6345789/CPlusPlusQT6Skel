@@ -29,7 +29,7 @@ Rectangle {
         spacing: 12
 
         Rectangle {
-            width: 4; height: 36; radius: 2
+            Layout.preferredWidth: 4; height: 36; radius: 2
             color: root.accent
         }
 

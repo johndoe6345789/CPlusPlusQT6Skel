@@ -34,7 +34,7 @@ Rectangle {
         spacing: 10
 
         Rectangle {
-            width: 8; height: 8; radius: 4
+            Layout.preferredWidth: 8; height: 8; radius: 4
             color: statusColor
         }
 

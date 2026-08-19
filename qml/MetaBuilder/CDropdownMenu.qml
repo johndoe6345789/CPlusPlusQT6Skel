@@ -68,7 +68,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.leftMargin: 8
             Layout.rightMargin: 8
-            height: 1
+            Layout.preferredHeight: 1
             color: isDark ? Qt.rgba(1,1,1,0.06) : Qt.rgba(0,0,0,0.06)
             visible: headerLoader.active
         }
@@ -99,7 +99,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.leftMargin: 8
             Layout.rightMargin: 8
-            height: 1
+            Layout.preferredHeight: 1
             color: isDark ? Qt.rgba(1,1,1,0.06) : Qt.rgba(0,0,0,0.06)
             visible: footerLoader.active
         }

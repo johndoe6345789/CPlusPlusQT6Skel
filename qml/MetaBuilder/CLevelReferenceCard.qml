@@ -57,8 +57,8 @@ Rectangle {
 
             // Level number badge
             Rectangle {
-                width: 28
-                height: 28
+                Layout.preferredWidth: 28
+                Layout.preferredHeight: 28
                 radius: 8
                 color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b,
                     root.isDark ? 0.2 : 0.15)

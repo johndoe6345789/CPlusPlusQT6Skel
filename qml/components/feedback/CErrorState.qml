@@ -46,8 +46,8 @@ Rectangle {
         // MD3 large icon (48px)
         Rectangle {
             Layout.alignment: Qt.AlignHCenter
-            width: 72
-            height: 72
+            Layout.preferredWidth: 72
+            Layout.preferredHeight: 72
             radius: 36
             color: Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.12)
 
@@ -89,15 +89,15 @@ Rectangle {
         // Spacer before button
         Item {
             Layout.fillWidth: true
-            height: Theme.spacingXs
+            Layout.preferredHeight: Theme.spacingXs
             visible: root.showRetry
         }
 
         // MD3 filled button
         Rectangle {
             Layout.alignment: Qt.AlignHCenter
-            width: buttonLabel.implicitWidth + Theme.spacingLg * 2
-            height: 40
+            Layout.preferredWidth: buttonLabel.implicitWidth + Theme.spacingLg * 2
+            Layout.preferredHeight: 40
             radius: 20
             color: buttonArea.containsMouse
                 ? Qt.lighter(Theme.primary, 1.15) : Theme.primary

@@ -79,8 +79,7 @@ Rectangle {
 
         Rectangle {
             Layout.preferredWidth: 60
-            height: 24
-            width: 32
+            Layout.preferredHeight: 24
             radius: 12
             color: routeData ? levelColor(routeData.level) : "#9e9e9e"
 
@@ -99,13 +98,11 @@ Rectangle {
 
         Rectangle {
             Layout.fillWidth: true
-            height: 10
-            width: 10
+            Layout.preferredHeight: 10
+            Layout.preferredWidth: 10
             radius: 5
             color: routeData && routeData.enabled ? "#4caf50" : "#9e9e9e"
             Layout.alignment: Qt.AlignVCenter
-            Layout.preferredWidth: 10
-            Layout.preferredHeight: 10
         }
     }
 }

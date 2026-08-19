@@ -47,7 +47,7 @@ Rectangle {
                     spacing: 8
 
                     Rectangle {
-                        width: 4
+                        Layout.preferredWidth: 4
                         Layout.fillHeight: true
                         color: modelData.accent
                         radius: 2

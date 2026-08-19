@@ -74,7 +74,7 @@ CCard {
                     ColumnLayout {
                         spacing: 4
                         Rectangle {
-                            width: 48; height: 48; radius: modelData.r
+                            Layout.preferredWidth: 48; height: 48; radius: modelData.r
                             color: "transparent"
                             border.width: 2
                             border.color: Theme.primary

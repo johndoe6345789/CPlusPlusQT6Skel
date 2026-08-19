@@ -82,8 +82,8 @@ Item {
                     spacing: 10
 
                     Rectangle {
-                        width: 36
-                        height: 36
+                        Layout.preferredWidth: 36
+                        Layout.preferredHeight: 36
                         radius: 18
                         color: Qt.rgba(0.39, 0.4, 0.95,
                             root.isDark ? 0.2 : 0.15)

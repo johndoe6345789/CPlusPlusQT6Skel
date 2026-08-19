@@ -29,8 +29,8 @@ Rectangle {
         Image {
             source: iconSource
             visible: iconSource.length > 0
-            width: 16
-            height: 16
+            Layout.preferredWidth: 16
+            Layout.preferredHeight: 16
             fillMode: Image.PreserveAspectFit
             opacity: 0.85
         }

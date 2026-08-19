@@ -193,8 +193,8 @@ Rectangle {
 
         // Close/remove icon
         Rectangle {
-            width: 18
-            height: 18
+            Layout.preferredWidth: 18
+            Layout.preferredHeight: 18
             radius: 9
             color: closeMouseArea.containsMouse
                 ? Qt.rgba(

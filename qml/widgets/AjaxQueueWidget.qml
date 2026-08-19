@@ -88,8 +88,8 @@ Rectangle {
                 
                 // Spinning icon when pending
                 Item {
-                    width: 24
-                    height: 24
+                    Layout.preferredWidth: 24
+                    Layout.preferredHeight: 24
                     
                     Text {
                         anchors.centerIn: parent
@@ -197,8 +197,8 @@ Rectangle {
                 
                 // Expand/collapse button
                 Rectangle {
-                    width: 24
-                    height: 24
+                    Layout.preferredWidth: 24
+                    Layout.preferredHeight: 24
                     radius: 12
                     color: mouseArea1.containsMouse
                         ? "#40ffffff" : "transparent"
@@ -231,8 +231,8 @@ Rectangle {
 
                 // Close button
                 Rectangle {
-                    width: 24
-                    height: 24
+                    Layout.preferredWidth: 24
+                    Layout.preferredHeight: 24
                     radius: 12
                     color: mouseArea2.containsMouse
                         ? "#40ffffff" : "transparent"
@@ -382,8 +382,8 @@ Rectangle {
                             // Progress indicator
                             Rectangle {
                                 visible: model.hasProgress
-                                width: progressText.width + 8
-                                height: 16
+                                Layout.preferredWidth: progressText.width + 8
+                                Layout.preferredHeight: 16
                                 radius: 8
                                 color: colors.border
                                 

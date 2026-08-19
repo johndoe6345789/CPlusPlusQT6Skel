@@ -22,7 +22,7 @@ FlexRow {
     visible: status !== ""
 
     Rectangle {
-        width: 10; height: 10; radius: 5
+        Layout.preferredWidth: 10; height: 10; radius: 5
         color: {
             if (root.status === "running") return Theme.warning
             if (root.status === "success") return Theme.success

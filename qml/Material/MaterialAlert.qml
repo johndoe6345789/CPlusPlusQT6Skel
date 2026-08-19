@@ -27,8 +27,8 @@ Rectangle {
         spacing: 12
 
         Rectangle {
-            width: 28
-            height: 28
+            Layout.preferredWidth: 28
+            Layout.preferredHeight: 28
             radius: 14
             color: severity === "success" ? MaterialPalette.primary :
                    severity === "error" ? MaterialPalette.error :

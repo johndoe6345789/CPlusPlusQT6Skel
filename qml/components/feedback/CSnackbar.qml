@@ -164,8 +164,8 @@ Item {
             Rectangle {
                 id: actionButton
                 visible: root._actionText !== ""
-                width: actionLabel.implicitWidth + 16
-                height: actionLabel.implicitHeight + 12
+                Layout.preferredWidth: actionLabel.implicitWidth + 16
+                Layout.preferredHeight: actionLabel.implicitHeight + 12
                 radius: 4
                 color: actionArea.containsMouse ?
                     Qt.rgba(root._inversePrimary.r, root._inversePrimary.g,

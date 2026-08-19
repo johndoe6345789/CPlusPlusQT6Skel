@@ -54,8 +54,8 @@ Rectangle {
             
             // Alias badge
             Rectangle {
-                width: aliasText.implicitWidth + 12
-                height: 22
+                Layout.preferredWidth: aliasText.implicitWidth + 12
+                Layout.preferredHeight: 22
                 radius: 4
                 color: themeColors.accent
                 opacity: 0.2
@@ -81,8 +81,8 @@ Rectangle {
             
             // PR indicator
             Rectangle {
-                width: 24
-                height: 24
+                Layout.preferredWidth: 24
+                Layout.preferredHeight: 24
                 radius: 12
                 color: themeColors.success || "#22c55e"
                 visible: hasPr

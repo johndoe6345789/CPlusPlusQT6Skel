@@ -18,8 +18,8 @@ CCard {
 
         // Package icon badge
         Rectangle {
-            width: 40
-            height: 40
+            Layout.preferredWidth: 40
+            Layout.preferredHeight: 40
             radius: 8
             color: packageData.installed ? Theme.primary : Theme.border
             Layout.alignment: Qt.AlignVCenter

@@ -44,6 +44,15 @@ jobs:
       - name: Lint QML layout patterns
         run: python3 scripts/lint-qml.py
 
+      - name: Install Qt tooling for qmllint
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.3'
+          cache: true
+
+      - name: QML regression gate (qmllint, ratcheted)
+        run: python3 scripts/qml-regression.py
+
       - name: Confirm CMakeLists.txt is up to date with its generator
         run: |
           python3 generate_cmake.py

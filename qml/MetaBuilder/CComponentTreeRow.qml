@@ -64,7 +64,7 @@ Rectangle {
         }
 
         Rectangle {
-            width: 8; height: 8; radius: 4
+            Layout.preferredWidth: 8; height: 8; radius: 4
             color: root.node ? typeBadgeColor(root.node.type) : "#9e9e9e"
         }
 

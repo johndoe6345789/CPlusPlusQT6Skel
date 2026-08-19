@@ -44,7 +44,7 @@ Rectangle {
 
         // Gradient avatar
         Rectangle {
-            width: 64; height: 64; radius: 32
+            Layout.preferredWidth: 64; height: 64; radius: 32
             gradient: Gradient {
                 orientation: Gradient.Vertical
                 GradientStop { position: 0.0; color: grad.from }
@@ -84,8 +84,8 @@ Rectangle {
 
                 // Level badge
                 Rectangle {
-                    width: levelLabel.implicitWidth + 14
-                    height: 22; radius: 11
+                    Layout.preferredWidth: levelLabel.implicitWidth + 14
+                    Layout.preferredHeight: 22; radius: 11
                     color: grad.from
 
                     Text {
@@ -100,8 +100,8 @@ Rectangle {
 
                 // Role outlined badge
                 Rectangle {
-                    width: roleLabel.implicitWidth + 14
-                    height: 22; radius: 11
+                    Layout.preferredWidth: roleLabel.implicitWidth + 14
+                    Layout.preferredHeight: 22; radius: 11
                     color: "transparent"
                     border.color: root.borderCol
                     border.width: 1.5

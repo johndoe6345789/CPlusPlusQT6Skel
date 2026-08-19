@@ -24,8 +24,8 @@ ColumnLayout {
             color: root.onSurface
         }
         Rectangle {
-            width: lvl.implicitWidth + 16
-            height: 24
+            Layout.preferredWidth: lvl.implicitWidth + 16
+            Layout.preferredHeight: 24
             radius: 12
             color: Qt.rgba(root.accentCyan.r, root.accentCyan.g,
                 root.accentCyan.b, 0.15)

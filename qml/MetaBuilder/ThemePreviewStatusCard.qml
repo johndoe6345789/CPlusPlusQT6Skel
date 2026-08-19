@@ -39,7 +39,7 @@ Rectangle {
 
         Rectangle {
             Layout.fillWidth: true
-            height: 1
+            Layout.preferredHeight: 1
             color: customBorder
         }
 
@@ -53,7 +53,7 @@ Rectangle {
             RowLayout {
                 spacing: 8
                 Rectangle {
-                    width: 8; height: 8; radius: 4
+                    Layout.preferredWidth: 8; height: 8; radius: 4
                     color: modelData.col
                 }
                 Text {
@@ -69,7 +69,7 @@ Rectangle {
 
         Rectangle {
             Layout.fillWidth: true
-            height: 30
+            Layout.preferredHeight: 30
             radius: radiusSmall
             color: customPrimary
 

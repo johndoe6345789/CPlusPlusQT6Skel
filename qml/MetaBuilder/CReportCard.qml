@@ -37,8 +37,8 @@ Rectangle {
 
         // Type indicator bar
         Rectangle {
-            width: 4
-            height: 36
+            Layout.preferredWidth: 4
+            Layout.preferredHeight: 36
             radius: 2
             color: root._r.type === "spam" ? "#F43F5E" :
                    root._r.type === "abuse" ? "#EF4444" :

@@ -87,7 +87,7 @@ Rectangle {
 
         // 48×48 gradient icon square with white level number
         Rectangle {
-            width: 48; height: 48; radius: 12
+            Layout.preferredWidth: 48; height: 48; radius: 12
             gradient: Gradient {
                 orientation: Gradient.Vertical
                 GradientStop { position: 0.0; color: grad.from }
@@ -125,8 +125,8 @@ Rectangle {
 
         // Unlocked / Locked badge
         Rectangle {
-            width: badgeText.implicitWidth + 14
-            height: 20; radius: 10
+            Layout.preferredWidth: badgeText.implicitWidth + 14
+            Layout.preferredHeight: 20; radius: 10
             color: locked ? borderDefault : Qt.color(grad.from)
 
             Text {

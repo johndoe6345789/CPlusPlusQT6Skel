@@ -115,8 +115,8 @@ Rectangle {
 
                         // Health indicator dot
                         Rectangle {
-                            width: 14
-                            height: 14
+                            Layout.preferredWidth: 14
+                            Layout.preferredHeight: 14
                             radius: 7
                             color: healthColor(modelData.health)
 

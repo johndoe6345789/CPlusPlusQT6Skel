@@ -55,8 +55,8 @@ CCard {
                         ColumnLayout {
                             spacing: 4
                             Rectangle {
-                                width: baseSpacing * modelData
-                                height: baseSpacing * modelData
+                                Layout.preferredWidth: baseSpacing * modelData
+                                Layout.preferredHeight: baseSpacing * modelData
                                 radius: 3
                                 color: Theme.primary
                                 opacity: 0.3 + (index * 0.15)

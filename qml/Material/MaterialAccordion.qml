@@ -35,8 +35,8 @@ Rectangle {
             Button {
                 text: accordion.expanded ? "−" : "+"
                 font.pixelSize: 16
-                width: 36
-                height: 36
+                Layout.preferredWidth: 36
+                Layout.preferredHeight: 36
                 background: Rectangle {
                     radius: 18
                     color: MaterialPalette.primaryContainer

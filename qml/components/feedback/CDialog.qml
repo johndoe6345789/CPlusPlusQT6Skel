@@ -117,8 +117,8 @@ Popup {
                 // MD3 close button (circular, subtle)
                 Rectangle {
                     visible: root.showClose
-                    width: 32
-                    height: 32
+                    Layout.preferredWidth: 32
+                    Layout.preferredHeight: 32
                     radius: 16
                     color: closeHover.containsMouse
                         ? Theme.actionHover : "transparent"

@@ -146,7 +146,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             visible: error !== ""
-            height: 48
+            Layout.preferredHeight: 48
             color: Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.12)
             radius: 4
             
@@ -295,7 +295,7 @@ Item {
                             // card__actions)
                             Rectangle {
                                 Layout.fillWidth: true
-                                height: 1
+                                Layout.preferredHeight: 1
                                 color: Theme.border
                             }
                             

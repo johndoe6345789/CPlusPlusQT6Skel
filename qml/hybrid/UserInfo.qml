@@ -101,8 +101,8 @@ Item {
                         
                         // Status indicator
                         Rectangle {
-                            width: 12
-                            height: 12
+                            Layout.preferredWidth: 12
+                            Layout.preferredHeight: 12
                             radius: 6
                             color: connectionStatus === "connected"
                                 ? Theme.success :

@@ -129,7 +129,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         visible: error !== ""
-                        height: 48
+                        Layout.preferredHeight: 48
                         color: Qt.rgba(Theme.error.r, Theme.error.g,
                             Theme.error.b, 0.12)
                         radius: 4
@@ -145,7 +145,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         visible: successMessage !== ""
-                        height: 48
+                        Layout.preferredHeight: 48
                         color: Qt.rgba(Theme.success.r, Theme.success.g,
                             Theme.success.b, 0.12)
                         radius: 4

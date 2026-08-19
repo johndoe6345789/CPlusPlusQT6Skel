@@ -101,7 +101,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             visible: error !== ""
-            height: 48
+            Layout.preferredHeight: 48
             color: Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.12)
             radius: 4
             
@@ -353,8 +353,8 @@ Item {
         Rectangle {
             Layout.alignment: Qt.AlignHCenter
             visible: snackbarMessage !== ""
-            width: snackbarText.width + 32
-            height: 48
+            Layout.preferredWidth: snackbarText.width + 32
+            Layout.preferredHeight: 48
             color: Theme.paper
             radius: 4
             

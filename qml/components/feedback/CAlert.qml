@@ -139,8 +139,8 @@ Rectangle {
         // Close button
         Rectangle {
             visible: root.closable
-            width: 28
-            height: 28
+            Layout.preferredWidth: 28
+            Layout.preferredHeight: 28
             radius: 14
             color: closeArea.containsMouse ? Qt.rgba(root._severityColor.r,
                 root._severityColor.g, root._severityColor.b,
