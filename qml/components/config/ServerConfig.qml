@@ -20,9 +20,13 @@ QtObject {
     // Servers offered out of the box. Kept separate from user entries so a
     // future release can change them without stranding what someone typed.
     readonly property var presets: [
-        "http://localhost:8080",
-        "http://localhost:3001/api/dbal",
-        "http://127.0.0.1:8080"
+        // nginx fronts DBAL at /api/dbal/ and strips that prefix before
+        // proxying to the dbal container, so this is the base the app's
+        // /health ping resolves against. The bare host:8080 hits the Next.js
+        // app instead and every DBAL call 404s, which reads as "offline".
+        "http://localhost:8080/api/dbal",
+        "http://127.0.0.1:8080/api/dbal",
+        "http://localhost:8080"
     ]
 
     property string url: presets[0]
