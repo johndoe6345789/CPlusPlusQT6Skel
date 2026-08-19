@@ -3,7 +3,7 @@
 # metabuilder's frontends/qt6 mounting this repo's QML tree; that frontend now
 # lives here and that arrangement is gone.
 #
-# conanfile.txt asks Conan for qt/6.7.3, and Conan has no prebuilt binary for
+# conanfile.txt asks Conan for qt/6.11.1, and Conan has no prebuilt binary for
 # that configuration, so `conan install --build=missing` would compile Qt
 # from source - hours of runner time and enough disk to exhaust the runner.
 # This workflow instead uses the repo's own download_qt6.py (python/download_qt6/),

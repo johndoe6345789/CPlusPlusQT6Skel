@@ -5,7 +5,7 @@
     "executable": "metabuilder-qt6"
   },
   "qt": {
-    "version": "6.7.3",
+    "version": "6.11.1",
     "components": [
       "Core",
       "Gui",
@@ -58,7 +58,7 @@
     "runtime_png": "assets/icon/appicon-256.png"
   },
   "update": {
-    "repo": "johndoe6345789/metabuilder",
+    "repo": "johndoe6345789/metabuilder-qt6-frontend",
     "default_channel": "dev",
     "tag_prefix": "qt6-v"
   },
