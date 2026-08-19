@@ -160,6 +160,13 @@ jobs:
           python3 scripts/visual-regression.py \
             --app build/metabuilder-qt6 || exit 1
 
+      - name: Upload binary
+        uses: actions/upload-artifact@v7
+        with:
+          name: metabuilder-qt6
+          path: build/metabuilder-qt6
+          if-no-files-found: error
+
       - name: Confirm binary
         run: |
           BIN=$(find _build -name metabuilder-qt6 -type f -perm -u+x | head -1)
