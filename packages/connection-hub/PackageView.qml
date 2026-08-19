@@ -62,6 +62,11 @@ Rectangle {
 
     ScrollView {
         anchors.fill: parent
+        // Without contentWidth the content width is derived from the
+        // content itself, which binds circularly against
+        // ColumnLayout.width: parent.width and collapses to an implicit
+        // width -- clipping the view at roughly half the window.
+        contentWidth: availableWidth
         anchors.margins: 20
         clip: true
 
@@ -74,8 +79,7 @@ Rectangle {
                 Layout.fillWidth: true
 
                 ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 20
+                    Layout.fillWidth: true
                     spacing: 12
 
                     FlexRow {
@@ -106,8 +110,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 16
+                        Layout.fillWidth: true
                         spacing: 16
 
                         // Health indicator dot
@@ -176,8 +179,7 @@ Rectangle {
                 Layout.fillWidth: true
 
                 ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 16
+                    Layout.fillWidth: true
                     spacing: 8
 
                     CText { variant: "subtitle1"; text: "Connection Summary" }

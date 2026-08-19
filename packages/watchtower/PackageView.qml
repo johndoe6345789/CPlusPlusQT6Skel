@@ -102,6 +102,9 @@ Rectangle {
     ScrollView {
         Layout.fillWidth: true
         clip: true
+        // See the note in the other package views: without this the content
+        // width binds circularly against the child layout and collapses.
+        contentWidth: availableWidth
 
         ColumnLayout {
             width: parent.width

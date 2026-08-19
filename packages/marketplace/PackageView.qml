@@ -50,6 +50,11 @@ Rectangle {
 
     ScrollView {
         anchors.fill: parent
+        // Without contentWidth the content width is derived from the
+        // content itself, which binds circularly against
+        // ColumnLayout.width: parent.width and collapses to an implicit
+        // width -- clipping the view at roughly half the window.
+        contentWidth: availableWidth
         anchors.margins: 20
         clip: true
 
@@ -62,8 +67,7 @@ Rectangle {
                 Layout.fillWidth: true
 
                 ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 20
+                    Layout.fillWidth: true
                     spacing: 12
 
                     FlexRow {
@@ -83,8 +87,7 @@ Rectangle {
                 Layout.fillWidth: true
 
                 RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: 16
+                    Layout.fillWidth: true
                     spacing: 12
 
                     CTextField {
@@ -127,8 +130,7 @@ Rectangle {
                         Layout.preferredHeight: 260
 
                         ColumnLayout {
-                            anchors.fill: parent
-                            anchors.margins: 16
+                            Layout.fillWidth: true
                             spacing: 10
 
                             // Image placeholder

@@ -46,7 +46,11 @@ Rectangle {
     radius: 12
     clip: true
     implicitWidth: 300
-    implicitHeight: contentColumn.implicitHeight
+    // contentColumn is inset by 16 on every side, so the card has to be that
+    // much taller than its content -- otherwise the bottom of the content is
+    // clipped by the card's own edge (16 top inset + 16 bottom padding).
+    readonly property int contentPadding: 16
+    implicitHeight: contentColumn.implicitHeight + contentPadding * 2
 
     // ── Fill colour per variant ────────────
     color: {
