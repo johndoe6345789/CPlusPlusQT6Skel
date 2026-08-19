@@ -158,7 +158,7 @@ ApplicationWindow {
                 CommentsView {}
                 Repeater {
                     model: PackageLoader
-                        ? PackageLoader.navigablePackages()
+                        ? PackageLoader.routablePackages()
                         : []
                     delegate: PackageViewLoader {
                         packageId:

@@ -250,20 +250,15 @@ QUrl PackageLoader::qmlPathUrl(const QString &packageId) const
     return QUrl(qrcPath);
 }
 
-QVariantList PackageLoader::navigablePackages() const
-{
-    QVariantList result;
-    for (auto it = m_packages.constBegin(); it != m_packages.constEnd(); ++it) {
-        const QJsonObject &meta = it.value();
-        if (meta.value(QStringLiteral("showInNav")).toBool(false)) {
-            QVariantMap entry = meta.toVariantMap();
-            entry[QStringLiteral("installed")] = m_installed.value(it.key(), false);
-            result.append(entry);
-        }
-    }
+namespace {
 
-    // Sort by level (ascending) then by name (alphabetical)
-    std::sort(result.begin(), result.end(), [](const QVariant &a, const QVariant &b) {
+// Packages order by access level, then alphabetically. Both navigablePackages()
+// and routablePackages() must agree on ordering: App.qml builds the package
+// views from routablePackages() and AppLogic.viewIndex() indexes into that same
+// list, so any mismatch would route to the wrong view.
+void sortByLevelThenName(QVariantList &list)
+{
+    std::sort(list.begin(), list.end(), [](const QVariant &a, const QVariant &b) {
         const QVariantMap ma = a.toMap();
         const QVariantMap mb = b.toMap();
         const int levelA = ma.value(QStringLiteral("level"), 2).toInt();
@@ -272,7 +267,32 @@ QVariantList PackageLoader::navigablePackages() const
             return levelA < levelB;
         return ma.value(QStringLiteral("name")).toString() < mb.value(QStringLiteral("name")).toString();
     });
+}
 
+} // namespace
+
+QVariantList PackageLoader::navigablePackages() const
+{
+    QVariantList result = routablePackages();
+    result.erase(std::remove_if(result.begin(), result.end(), [](const QVariant &v) {
+        return !v.toMap().value(QStringLiteral("showInNav")).toBool();
+    }), result.end());
+    return result;
+}
+
+// Every package that owns a view, regardless of whether it appears in the nav
+// bar. showInNav only controls nav-bar visibility -- it must not decide whether
+// a view is reachable, or CTAs that route to a hidden package silently fail.
+QVariantList PackageLoader::routablePackages() const
+{
+    QVariantList result;
+    for (auto it = m_packages.constBegin(); it != m_packages.constEnd(); ++it) {
+        QVariantMap entry = it.value().toVariantMap();
+        entry[QStringLiteral("installed")] = m_installed.value(it.key(), false);
+        result.append(entry);
+    }
+
+    sortByLevelThenName(result);
     return result;
 }
 

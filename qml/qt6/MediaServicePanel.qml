@@ -83,7 +83,7 @@ Rectangle {
     }
     Timer {
         interval: 30000; repeat: true
-        running: true
+        running: visible
         onTriggered: healthCheck()
     }
 

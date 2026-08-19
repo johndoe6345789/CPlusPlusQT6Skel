@@ -375,8 +375,18 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
         lines.append(f'        MACOSX_BUNDLE_BUNDLE_NAME "{macos.get("bundle_name", proj["name"])}"')
         lines.append(f'        MACOSX_BUNDLE_GUI_IDENTIFIER "{macos.get("identifier", "local." + proj["name"])}"')
         lines.append(f'        MACOSX_BUNDLE_BUNDLE_VERSION "{proj["version"]}"')
+        icon = macos.get("icon")
+        if icon:
+            # CFBundleIconFile is the basename without extension; the .icns
+            # itself must be copied into Contents/Resources to be found.
+            icon_name = icon.rsplit("/", 1)[-1]
+            lines.append(f'        MACOSX_BUNDLE_ICON_FILE "{icon_name.rsplit(".", 1)[0]}"')
         lines.append(f'        MACOSX_BUNDLE_SHORT_VERSION_STRING "{proj["version"]}"')
         lines.append("    )")
+        if icon:
+            lines.append(f'    set_source_files_properties("${{CMAKE_CURRENT_SOURCE_DIR}}/{icon}"')
+            lines.append("        PROPERTIES MACOSX_PACKAGE_LOCATION Resources)")
+            lines.append(f'    target_sources({proj["executable"]} PRIVATE "${{CMAKE_CURRENT_SOURCE_DIR}}/{icon}")')
         lines.append("    # The engine reads these from disk at runtime, so copy them into")
         lines.append("    # Contents/Resources to keep the bundle relocatable.")
         lines.append(f"    add_custom_command(TARGET {proj['executable']} POST_BUILD")

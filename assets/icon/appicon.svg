@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.65" y2="1">
+      <stop offset="0" stop-color="#7C7CF5"/>
+      <stop offset="0.45" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#4F2ED9"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="top" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#E4E2FF"/>
+    </linearGradient>
+    <filter id="drop" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="26" flood-color="#1A0B52" flood-opacity="0.42"/>
+    </filter>
+  </defs>
+
+  <!-- squircle body -->
+  <g filter="url(#drop)">
+    <rect x="100" y="100" width="824" height="824" rx="188" ry="188" fill="url(#bg)"/>
+    <rect x="100" y="100" width="824" height="824" rx="188" ry="188" fill="url(#sheen)"/>
+  </g>
+
+  <!-- isometric stacked layers: bottom -> top -->
+  <g transform="translate(512 596)">
+    <!-- bottom layer -->
+    <path d="M0 96 L-232 -38 L0 -172 L232 -38 Z" fill="#ffffff" opacity="0.34"/>
+    <!-- middle layer -->
+    <path d="M0 -44 L-232 -178 L0 -312 L232 -178 Z" fill="#ffffff" opacity="0.62"/>
+    <!-- top layer -->
+    <path d="M0 -184 L-232 -318 L0 -452 L232 -318 Z" fill="url(#top)"/>
+    <!-- top-face inner facet for depth -->
+    <path d="M0 -184 L0 -452 L232 -318 Z" fill="#B9B4FF" opacity="0.55"/>
+  </g>
+</svg>

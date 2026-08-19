@@ -12,11 +12,25 @@ Rectangle {
 
     property string packageId: ""
 
+    // StackLayout builds every child up front, so binding the Loader's source
+    // directly would construct all package views at launch -- paying their
+    // memory and any Component.onCompleted work for views never opened. Latch
+    // on first display instead: load when the view is first shown, then stay
+    // loaded so revisiting a package is instant.
+    // NB: plain `visible` is unreliable here -- an Item defaults to visible
+    // and StackLayout only clears it after construction, so every delegate
+    // would latch on Component.onCompleted. isCurrentItem is authoritative.
+    property bool everShown: false
+    StackLayout.onIsCurrentItemChanged:
+        if (StackLayout.isCurrentItem) everShown = true
+    Component.onCompleted:
+        if (StackLayout.isCurrentItem) everShown = true
+
     // Resolve view URL via PackageLoader (disk → QRC fallback)
     Loader {
         id: viewLoader
         anchors.fill: parent
-        source: (packageId !== "" && PackageLoader)
+        source: (loader.everShown && packageId !== "" && PackageLoader)
             ? PackageLoader.qmlPathUrl(packageId) : ""
         onStatusChanged: {
             if (status === Loader.Error) {

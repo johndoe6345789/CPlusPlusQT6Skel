@@ -92,8 +92,7 @@ Item {
                 blocks.push({ type: "h3", text: line.substring(4) })
             }
             // Horizontal rule
-            else if (line.match(/^-{3,}$/) || line.match(/^_{3,
-                }$/) || line.match(/^\*{3,}$/)) {
+            else if (line.match(/^-{3,}$/) || line.match(/^_{3,}$/) || line.match(/^\*{3,}$/)) {
                 blocks.push({ type: "hr" })
             }
             // Blockquote

@@ -41,6 +41,7 @@ public slots:
     QString qmlPath(const QString &packageId) const;
     QUrl qmlPathUrl(const QString &packageId) const;
     QVariantList navigablePackages() const;
+    QVariantList routablePackages() const;
 
 signals:
     void packagesChanged();

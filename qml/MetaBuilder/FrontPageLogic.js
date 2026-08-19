@@ -24,7 +24,7 @@ function resolveStatus(dbalOnline, key) {
 
 function loadFallbackData(root) {
     var data = loadJson(
-        "config/frontpage-data.json")
+        "../../config/frontpage-data.json")
     if (!data) return
     root.levels = data.levels.map(function(l) {
         l.accent = resolveAccent(
@@ -48,7 +48,7 @@ function loadFallbackData(root) {
 function refreshServiceStatuses(root) {
     if (root.services.length === 0) return
     var raw = loadJson(
-        "config/frontpage-data.json")
+        "../../config/frontpage-data.json")
     if (!raw) return
     root.services = raw.services.map(
         function(s) {

@@ -659,8 +659,12 @@ if(APPLE)
         MACOSX_BUNDLE_BUNDLE_NAME "MetaBuilder"
         MACOSX_BUNDLE_GUI_IDENTIFIER "local.metabuilder.qt6"
         MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
+        MACOSX_BUNDLE_ICON_FILE "MetaBuilder"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
     )
+    set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/assets/icon/MetaBuilder.icns"
+        PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    target_sources(metabuilder-qt6 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/assets/icon/MetaBuilder.icns")
     # The engine reads these from disk at runtime, so copy them into
     # Contents/Resources to keep the bundle relocatable.
     add_custom_command(TARGET metabuilder-qt6 POST_BUILD

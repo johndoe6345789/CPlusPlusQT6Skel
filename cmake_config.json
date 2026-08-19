@@ -28,7 +28,8 @@
   "macos": {
     "bundle": true,
     "bundle_name": "MetaBuilder",
-    "identifier": "local.metabuilder.qt6"
+    "identifier": "local.metabuilder.qt6",
+    "icon": "assets/icon/MetaBuilder.icns"
   },
   "compile_definitions": {
     "SRCDIR": "${CMAKE_CURRENT_SOURCE_DIR}"

@@ -28,7 +28,7 @@ function viewIndex(app) {
     var staticIdx = app.staticViews.indexOf(view)
     if (staticIdx >= 0) return staticIdx
     var navPkgs = PackageLoader
-        ? PackageLoader.navigablePackages() : []
+        ? PackageLoader.routablePackages() : []
     for (var i = 0; i < navPkgs.length; i++) {
         var pkg = navPkgs[i]
         var viewName = packageViewName(pkg)
@@ -36,6 +36,10 @@ function viewIndex(app) {
             || pkg.packageId === view)
             return app.staticViews.length + i
     }
+    // Falling back silently makes a mistyped or unroutable view look like a
+    // dead button, so make the miss visible.
+    console.warn("viewIndex: no view registered for '" + view
+        + "', falling back to frontpage")
     return 0
 }
 
