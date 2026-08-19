@@ -27,6 +27,27 @@ APP="$BUILD/metabuilder-qt6.app"
 : "${SIGN_IDENTITY:?set SIGN_IDENTITY to a Developer ID Application certificate}"
 : "${NOTARY_PROFILE:?set NOTARY_PROFILE to a notarytool keychain profile}"
 
+# An "Apple Development" certificate signs fine but Gatekeeper rejects it on
+# any other machine, and notarization refuses it outright -- so catch it here
+# rather than after a build and a notarization round trip.
+case "$SIGN_IDENTITY" in
+    "Developer ID Application:"*) ;;
+    *)
+        echo "error: SIGN_IDENTITY must be a 'Developer ID Application' certificate." >&2
+        echo "       Got: $SIGN_IDENTITY" >&2
+        echo "       Apple Development certs cannot be notarized and Sparkle" >&2
+        echo "       updates signed with them are blocked by Gatekeeper." >&2
+        echo "       Available identities:" >&2
+        security find-identity -v -p codesigning >&2
+        exit 1
+        ;;
+esac
+
+if ! security find-identity -v -p codesigning | grep -qF "$SIGN_IDENTITY"; then
+    echo "error: no such signing identity in the keychain: $SIGN_IDENTITY" >&2
+    exit 1
+fi
+
 echo "==> Building $VERSION"
 cmake -S "$ROOT" -B "$BUILD" -G Ninja -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_PREFIX_PATH="${QT_PREFIX:-/opt/homebrew/opt/qt}"
