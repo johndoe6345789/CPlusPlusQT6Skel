@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QIcon>
+#include <QQuickStyle>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
@@ -19,6 +20,13 @@
 
 int main(int argc, char *argv[]) {
     qputenv("QML_XHR_ALLOW_FILE_READ", "1");
+    // Must precede any Controls instantiation. The platform styles (macOS,
+    // iOS, Windows) are native-rendered and silently discard a Control's
+    // custom background/contentItem -- which this codebase sets on every
+    // CButton, CTextField and CSelect, so those customisations were being
+    // thrown away wholesale. Basic honours them on every platform, which also
+    // keeps the app looking the same across desktop and mobile.
+    QQuickStyle::setStyle(QStringLiteral("Basic"));
     QGuiApplication app(argc, argv);
     app.setOrganizationName("MetaBuilder");
     app.setOrganizationDomain("metabuilder.local");

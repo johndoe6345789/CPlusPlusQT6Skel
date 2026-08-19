@@ -40,7 +40,7 @@ endif()
 
 include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake OPTIONAL)
 
-find_package(Qt6 COMPONENTS Core Gui Quick Qml Network REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui Quick Qml Network QuickControls2 REQUIRED)
 qt_policy(SET QTP0001 NEW)
 
 qt_add_executable(metabuilder-qt6
@@ -650,7 +650,7 @@ qt_add_resources(metabuilder-qt6 "svg_assets"
 )
 
 target_link_libraries(metabuilder-qt6 PRIVATE
-    Qt6::Core Qt6::Gui Qt6::Quick Qt6::Qml Qt6::Network
+    Qt6::Core Qt6::Gui Qt6::Quick Qt6::Qml Qt6::Network Qt6::QuickControls2
 )
 
 # Update channel. A source build stays on "dev" and never checks for

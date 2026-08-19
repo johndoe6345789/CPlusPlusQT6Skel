@@ -11,7 +11,8 @@
       "Gui",
       "Quick",
       "Qml",
-      "Network"
+      "Network",
+      "QuickControls2"
     ]
   },
   "cpp": {
