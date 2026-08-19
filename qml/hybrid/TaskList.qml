@@ -172,6 +172,10 @@ Item {
         
         // Task Grid - uses app.taskModel from Python controller
         ScrollView {
+            // Without this the content width derives from the content itself
+            // while the child binds width: parent.width -- circular, so it
+            // settles on an implicit width and clips. Prefer CScrollPage.
+            contentWidth: availableWidth
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: !loading

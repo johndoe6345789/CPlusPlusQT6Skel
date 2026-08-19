@@ -10,8 +10,7 @@ CCard {
     property string filterLabel: "All"
 
     ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 40
+        Layout.fillWidth: true
         spacing: 16
         Layout.alignment: Qt.AlignHCenter
 

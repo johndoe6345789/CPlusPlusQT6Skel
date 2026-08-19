@@ -91,8 +91,7 @@ Rectangle {
                 variant: "outlined"
 
                 Loader {
-                    anchors.fill: parent
-                    anchors.margins: 24
+                    Layout.fillWidth: true
                     sourceComponent:
                         samples.sampleComponent(
                             selectedComponent)

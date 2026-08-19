@@ -18,8 +18,7 @@ CCard {
     signal showSnackbarChanged(bool value)
 
     ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 18
+        Layout.fillWidth: true
         spacing: 12
 
         CText { variant: "h4"; text: "Components" }

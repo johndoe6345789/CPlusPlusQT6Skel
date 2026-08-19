@@ -117,6 +117,8 @@ Dialog {
     
     contentItem: ScrollView {
         clip: true
+        // Child binds width: parent.width; without this they bind circularly.
+        contentWidth: availableWidth
         
         ColumnLayout {
             width: parent.width

@@ -350,6 +350,10 @@ Item {
             
             // Details tab
             ScrollView {
+                // Without this the content width derives from the content itself
+                // while the child binds width: parent.width -- circular, so it
+                // settles on an implicit width and clips. Prefer CScrollPage.
+                contentWidth: availableWidth
                 clip: true
                 
                 ColumnLayout {

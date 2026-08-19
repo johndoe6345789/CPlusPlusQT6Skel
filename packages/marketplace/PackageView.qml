@@ -194,8 +194,7 @@ Rectangle {
                 visible: cartCount > 0
 
                 ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 16
+                    Layout.fillWidth: true
                     spacing: 8
 
                     FlexRow {

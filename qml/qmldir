@@ -44,6 +44,7 @@ CFlex 1.0 components/layout/CFlex.qml
 CStack 1.0 components/layout/CStack.qml
 CImageList 1.0 components/layout/CImageList.qml
 Spacer 1.0 components/layout/Spacer.qml
+CScrollPage 1.0 components/layout/CScrollPage.qml
 FlexRow 1.0 components/layout/FlexRow.qml
 FlexCol 1.0 components/layout/FlexCol.qml
 

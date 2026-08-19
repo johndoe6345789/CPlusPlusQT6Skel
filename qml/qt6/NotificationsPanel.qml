@@ -52,6 +52,10 @@ Rectangle {
         if (useLiveData) refresh()
 
     ScrollView {
+        // Without this the content width derives from the content itself
+        // while the child binds width: parent.width -- circular, so it
+        // settles on an implicit width and clips. Prefer CScrollPage.
+        contentWidth: availableWidth
         anchors.fill: parent
         anchors.margins: 24; clip: true
         ColumnLayout {
@@ -59,8 +63,7 @@ Rectangle {
             CCard {
                 Layout.fillWidth: true
                 ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 20
+                    Layout.fillWidth: true
                     spacing: 12
                     FlexRow {
                         Layout.fillWidth: true
@@ -140,7 +143,7 @@ Rectangle {
                         activeFilter
                     ).length > 0
                 ColumnLayout {
-                    anchors.fill: parent
+                    Layout.fillWidth: true
                     anchors.margins: 16; spacing: 0
                     Repeater {
                         model:
