@@ -128,11 +128,17 @@ Rectangle {
                 color: Theme.text
             }
 
-            FlexRow {
+            GridLayout {
                 Layout.fillWidth: true
                 Layout.leftMargin: 24
                 Layout.rightMargin: 24
-                spacing: 14
+                columnSpacing: 14
+                rowSpacing: 14
+                // A level card needs ~220px before its name and description
+                // clip. As a single row of five, each card got ~60px at phone
+                // width; reflow instead, matching the front page's grid.
+                columns: Math.max(1, Math.min(5,
+                    Math.floor((width + 14) / 220)))
 
                 Repeater {
                     model: dashRoot.levelDefs

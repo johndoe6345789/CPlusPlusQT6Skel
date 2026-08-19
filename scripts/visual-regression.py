@@ -34,7 +34,13 @@ REFS = ROOT / "tests" / "visual" / "refs" / PLATFORM
 
 # Views reachable without authenticating, at the breakpoints that matter:
 # phone, tablet, desktop.
-VIEWS = ["frontpage", "login", "marketplace", "storybook"]
+# --capture-view sets currentView directly, so views the nav gates behind a
+# login are still reachable for rendering.
+VIEWS = [
+    "frontpage", "login", "dashboard", "profile", "moderator", "admin",
+    "god-panel", "supergod", "settings", "comments",
+    "marketplace", "storybook", "watchtower", "analytics", "gallery",
+]
 SIZES = [("phone", 390, 844), ("tablet", 768, 1024), ("desktop", 1360, 860)]
 
 # A handful of pixels can differ from font hinting on a different host; a real

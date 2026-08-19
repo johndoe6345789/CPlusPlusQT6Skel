@@ -39,16 +39,25 @@ TextField {
     rightPadding:
         (clearable && text.length > 0)
             || suffixIcon ? 40 : 16
-    topPadding:
-        label && (activeFocus || text.length > 0)
-            ? 18 : 0
+    // The label rests on the input line when the field is empty and
+    // unfocused, which is exactly where the placeholder draws -- so the two
+    // used to render on top of each other. While the label is resting it acts
+    // as the placeholder (MD3 behaviour); the real placeholder only appears
+    // once the label has floated up.
+    readonly property bool _labelFloated:
+        activeFocus || text.length > 0
+    readonly property bool _labelResting:
+        label.length > 0 && !_labelFloated
+
+    topPadding: label && _labelFloated ? 18 : 0
     verticalAlignment: TextInput.AlignVCenter
 
     font.pixelSize: 14
     font.family: Theme.fontFamily
     color: enabled
         ? Theme.text : Theme.textDisabled
-    placeholderTextColor: Theme.textSecondary
+    placeholderTextColor: _labelResting
+        ? "transparent" : Theme.textSecondary
     selectionColor: Theme.primary
     selectedTextColor: Theme.primaryContrastText
 
@@ -102,10 +111,7 @@ TextField {
             id: floatingLabel
             text: control.label
             visible: control.label.length > 0
-            font.pixelSize:
-                (control.activeFocus
-                    || control.text.length > 0)
-                ? 11 : 14
+            font.pixelSize: control._labelFloated ? 11 : 14
             font.family: Theme.fontFamily
             font.weight: Font.Medium
             color: {
@@ -116,8 +122,7 @@ TextField {
             }
 
             x: control.prefixIcon ? 40 : 16
-            y: (control.activeFocus
-                    || control.text.length > 0)
+            y: control._labelFloated
                 ? 6
                 : (parent.height - height) / 2
 
