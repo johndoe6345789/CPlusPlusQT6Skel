@@ -80,7 +80,8 @@ Text {
     lineHeightMode: Text.ProportionalHeight
 
     // Default to no wrap — callers opt in with wrapMode: Text.Wrap
-    wrapMode: truncate ? Text.NoWrap : Text.NoWrap
+    // Both branches were identical; callers opt into wrapping explicitly.
+    wrapMode: Text.NoWrap
 
     color: {
         switch (colorVariant) {
@@ -95,6 +96,13 @@ Text {
         }
     }
 
-    elide: truncate ? Text.ElideRight : Text.ElideNone
+    // Elide by default for single-line text. Eliding only takes effect when
+    // the item is narrower than its content, so text with room renders
+    // identically -- but text squeezed by a layout now truncates cleanly
+    // instead of drawing outside its own bounds and over its neighbour.
+    // That overflow is why labels overlapped in the stats strip and the
+    // service pills. Wrapped text keeps ElideNone so it can use every line.
+    elide: (truncate || wrapMode === Text.NoWrap)
+        ? Text.ElideRight : Text.ElideNone
     maximumLineCount: truncate ? 1 : undefined
 }

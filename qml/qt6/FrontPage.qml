@@ -100,8 +100,12 @@ Rectangle {
                     color: onSurface
                         Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter }
-                RowLayout {
-                    Layout.fillWidth: true; spacing: 10
+                // CGrid variant:"auto" reflows on available width. As a
+                // RowLayout these five pills were squeezed to ~70px each on a
+                // narrow window and their labels overlapped each other.
+                CGrid {
+                    Layout.fillWidth: true
+                    variant: "auto"; minItemWidth: 170; gap: "sm"
                     Repeater { model: services
                         delegate: CServiceStatus { Layout.fillWidth: true
                             name: modelData.name
