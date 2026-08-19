@@ -20,7 +20,12 @@
   },
   "qml": {
     "uri": "DBALObservatory",
-    "version": "1.0"
+    "version": "1.0",
+    "shared_modules": [
+      "MetaBuilder",
+      "Material",
+      "dbal"
+    ]
   },
   "features": {
     "libopenmpt": false,

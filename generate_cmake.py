@@ -83,12 +83,16 @@ def find_root_qml_files(root_dir: Path) -> list[tuple[str, Optional[str]]]:
     return result
 
 
-def find_qmllib_files(root_dir: Path) -> dict[str, list[tuple[str, Optional[str]]]]:
+def find_qmllib_files(root_dir: Path,
+                      shared_modules: Optional[list[str]] = None,
+                      ) -> dict[str, list[tuple[str, Optional[str]]]]:
     """Find qmllib QML/JS and qmldir files. Returns dict with 'qml' and 'resources'.
 
     Searches local qmllib/ (following symlinks) and extracted ../../qml/{module}/
     directories. Extracted files get QT_RESOURCE_ALIAS for correct QRC URIs.
     """
+    if shared_modules is None:
+        shared_modules = ["MetaBuilder", "Material", "dbal"]
     result: dict[str, list[tuple[str, Optional[str]]]] = {"qml": [], "resources": []}
 
     # Mapping of (real_directory, qrc_prefix)
@@ -102,7 +106,19 @@ def find_qmllib_files(root_dir: Path) -> dict[str, list[tuple[str, Optional[str]
     # Shared tree: {MetaBuilder,Material,dbal}
     extracted_qml = find_shared_qml_root(root_dir)
     if extracted_qml:
-        for module in ["MetaBuilder", "Material", "dbal"]:
+        # Which shared modules get compiled into the QRC. Config-driven
+        # rather than hardcoded: this list silently went stale across a
+        # refactor, which is how qml/components (the entire component
+        # library), qml/hybrid and qml/widgets ended up as no build input at
+        # all -- they are only copied into the bundle POST_BUILD, so editing
+        # one does not trigger a rebuild.
+        #
+        # NB adding a directory here is not sufficient on its own: these are
+        # aliased under qmllib/<module>, whereas the component library is
+        # consumed as `import QmlComponents 1.0` resolved from the on-disk
+        # import path. Compiling it in without also moving that import would
+        # produce two copies that drift.
+        for module in shared_modules:
             candidate = extracted_qml / module
             if candidate.exists() and not (qmllib_dir / module).exists():
                 dirs_to_scan.append((candidate, f"qmllib/{module}"))
@@ -213,7 +229,7 @@ def generate_cmake(config: dict, root_dir: Path) -> str:
 
     # Discover files
     root_qml = find_root_qml_files(root_dir)
-    qmllib = find_qmllib_files(root_dir)
+    qmllib = find_qmllib_files(root_dir, qml.get("shared_modules"))
     package_qml = find_package_qml_files(root_dir)
     config_files = find_config_files(root_dir)
     cpp_sources = find_cpp_sources(root_dir)
@@ -576,7 +592,7 @@ def main():
 
     # Summary
     root_qml = find_root_qml_files(root_dir)
-    qmllib = find_qmllib_files(root_dir)
+    qmllib = find_qmllib_files(root_dir, config["qml"].get("shared_modules"))
     package_qml = find_package_qml_files(root_dir)
     cpp_sources = find_cpp_sources(root_dir)
     svg_assets = find_svg_assets(root_dir)

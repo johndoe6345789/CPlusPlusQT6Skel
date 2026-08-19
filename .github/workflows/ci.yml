@@ -26,8 +26,38 @@ permissions:
   contents: read
 
 jobs:
+  # Runs before the build: these checks are seconds, and every pattern they
+  # catch has already shipped once as a visibly broken UI.
+  lint:
+    name: Lint QML
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Lint QML layout patterns
+        run: python3 scripts/lint-qml.py
+
+      - name: Confirm CMakeLists.txt is up to date with its generator
+        run: |
+          python3 generate_cmake.py
+          if ! git diff --quiet -- CMakeLists.txt; then
+            echo "::error::CMakeLists.txt is stale -- it is generated from"
+            echo "::error::cmake_config.json by generate_cmake.py. Re-run"
+            echo "::error::'python3 generate_cmake.py' and commit the result."
+            git --no-pager diff -- CMakeLists.txt
+            exit 1
+          fi
+
   build:
     name: Build
+    needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
