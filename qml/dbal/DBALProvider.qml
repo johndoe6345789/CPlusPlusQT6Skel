@@ -1,4 +1,5 @@
 import QtQuick
+import QmlComponents 1.0
 
 /**
  * QML DBAL Client Component
@@ -36,7 +37,9 @@ Item {
     id: root
     
     // Configuration — DBAL REST: /api/v1/{tenant}/{package}/{entity}[/{id}]
-    property string baseUrl: "http://localhost:8080"
+    // Single source of truth: every DBALProvider in the app follows the
+    // configured server unless a caller deliberately overrides it.
+    property string baseUrl: ServerConfig.url
     property string tenantId: "default"
     property string packageId: "core"
     property string authToken: ""
@@ -154,6 +157,10 @@ Item {
         var path = "/api/v1/" + tenantId + "/" + operation
         internal.request("POST", path, params, callback)
     }
+
+    // Re-check as soon as the configured server changes, so the offline
+    // banner and every view reflect the new target without a restart.
+    onBaseUrlChanged: ping(function(ok) {})
 
     function ping(callback) {
         internal.request("GET", "/health", null, function(result, error) {

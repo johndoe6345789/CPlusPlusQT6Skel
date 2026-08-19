@@ -890,6 +890,8 @@ qt_add_resources(metabuilder-qt6 "component_tree"
         qml/components/atoms/CText.qml
         qml/components/atoms/CTitle.qml
         qml/components/atoms/CTypography.qml
+        qml/components/config/CServerConfigDialog.qml
+        qml/components/config/ServerConfig.qml
         qml/components/core/CButton.qml
         qml/components/core/CCard.qml
         qml/components/core/CChip.qml

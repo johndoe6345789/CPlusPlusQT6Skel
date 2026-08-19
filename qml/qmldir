@@ -24,6 +24,7 @@ CAutocomplete 1.0 components/form/CAutocomplete.qml
 CCheckbox 1.0 components/form/CCheckbox.qml
 CRadio 1.0 components/form/CRadio.qml
 CSwitch 1.0 components/form/CSwitch.qml
+CServerConfigDialog 1.0 components/config/CServerConfigDialog.qml
 CSelect 1.0 components/form/CSelect.qml
 CSlider 1.0 components/form/CSlider.qml
 CToggleButton 1.0 components/form/CToggleButton.qml
@@ -113,6 +114,7 @@ CUseMediaQuery 1.0 components/utils/CUseMediaQuery.qml
 CPopover 1.0 components/utils/CPopover.qml
 
 # Theming Components
+singleton ServerConfig 1.0 components/config/ServerConfig.qml
 singleton Theme 1.0 components/theming/Theme.qml
 singleton StyleVariables 1.0 components/theming/StyleVariables.qml
 singleton StyleMixins 1.0 components/theming/StyleMixins.qml

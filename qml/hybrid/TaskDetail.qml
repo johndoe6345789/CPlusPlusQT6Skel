@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Controls
 import QtQuick.Layouts
 import contexts
@@ -359,8 +360,17 @@ Item {
             radius: 4
             
             layer.enabled: true
-            layer.effect: Item {
-                // Shadow effect placeholder
+            layer.effect: MultiEffect {
+                // Was an Item wrapping plain Rectangles. layer.effect must sample the
+                // layer texture -- a plain Item replaces the item's rendering and
+                // never draws the source, so the element vanished and left only the
+                // faint tint those Rectangles painted. CDialog was fully transparent
+                // because of this.
+                shadowEnabled: true
+                shadowColor: "#000000"
+                shadowBlur: 0.6
+                shadowVerticalOffset: 4
+                shadowOpacity: 0.18
             }
             
             Text {

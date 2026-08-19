@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Controls
 import QtQuick.Layouts
 import QmlComponents 1.0
@@ -71,20 +72,17 @@ Popup {
 
         // MD3 elevation shadow
         layer.enabled: true
-        layer.effect: Item {
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: -8
-                color: "transparent"
-
-                Rectangle {
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    color: "#000000"
-                    opacity: 0.18
-                    radius: 32
-                }
-            }
+        layer.effect: MultiEffect {
+            // Was an Item wrapping plain Rectangles. layer.effect must sample the
+            // layer texture -- a plain Item replaces the item's rendering and
+            // never draws the source, so the element vanished and left only the
+            // faint tint those Rectangles painted. CDialog was fully transparent
+            // because of this.
+            shadowEnabled: true
+            shadowColor: "#000000"
+            shadowBlur: 0.6
+            shadowVerticalOffset: 4
+            shadowOpacity: 0.18
         }
     }
 

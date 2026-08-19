@@ -115,12 +115,64 @@ ApplicationWindow {
             left: parent.left
             right: parent.right
         }
-        height: 28; color: "#e65100"; z: 10
-        CText {
+        // Tall enough for a tappable action, matching the update banner.
+        height: 34; color: "#e65100"; z: 10
+
+        RowLayout {
             anchors.centerIn: parent
-            variant: "caption"; color: "#fff"
-            text: "DBAL Offline \u2014 "
-                + "showing cached data"
+            width: Math.min(parent.width - 24, implicitWidth)
+            spacing: 10
+
+            CText {
+                Layout.fillWidth: true
+                variant: "caption"; color: "#fff"
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignRight
+                text: dbalBanner.width < 420
+                    ? "DBAL Offline"
+                    : "DBAL Offline \u2014 showing cached data"
+            }
+
+            // Built from primitives rather than CButton: on a coloured banner
+            // the ghost variant paints accent-on-orange, which is unreadable.
+            Rectangle {
+                implicitWidth: cfgLabel.implicitWidth + 20
+                implicitHeight: 22
+                radius: 11
+                color: cfgMouse.containsMouse
+                    ? Qt.rgba(1, 1, 1, 0.30) : Qt.rgba(1, 1, 1, 0.18)
+                border.width: 1
+                border.color: Qt.rgba(1, 1, 1, 0.45)
+
+                Accessible.role: Accessible.Button
+                Accessible.name: "Configure server"
+                Accessible.onPressAction: serverConfigDialog.open()
+
+                Text {
+                    id: cfgLabel
+                    anchors.centerIn: parent
+                    text: "Configure"
+                    color: "#fff"
+                    font.pixelSize: 11
+                    font.weight: Font.DemiBold
+                }
+                MouseArea {
+                    id: cfgMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: serverConfigDialog.open()
+                }
+            }
+        }
+    }
+
+    CServerConfigDialog {
+        id: serverConfigDialog
+        // DBALProvider re-pings on its own when the URL changes; this just
+        // surfaces which server was chosen.
+        onApplied: function(url) {
+            console.info("server set to", url)
         }
     }
 
