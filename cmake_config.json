@@ -47,5 +47,10 @@
     "ico": "assets/icon/MetaBuilder.ico",
     "linux_dir": "assets/icon/linux",
     "runtime_png": "assets/icon/appicon-256.png"
+  },
+  "update": {
+    "repo": "johndoe6345789/metabuilder",
+    "default_channel": "dev",
+    "tag_prefix": "qt6-v"
   }
 }

@@ -11,6 +11,7 @@
 #include "src/DBALClient.h"
 #include "src/PackageLoader.h"
 #include "src/NodeRegistry.hpp"
+#include "src/UpdateChecker.h"
 
 #ifdef METABUILDER_SPARKLE
 #include "src/SparkleUpdater.h"
@@ -25,6 +26,7 @@ int main(int argc, char *argv[]) {
     // Window/taskbar icon. macOS uses the bundle's .icns instead, but this is
     // what Linux and Windows read, and it also covers an unbundled build.
     app.setWindowIcon(QIcon(QStringLiteral(":/appicon-256.png")));
+    app.setApplicationVersion(QStringLiteral(METABUILDER_VERSION));
 
 #ifdef METABUILDER_SPARKLE
     // No-ops unless the bundle carries a feed URL and public key.
@@ -32,6 +34,12 @@ int main(int argc, char *argv[]) {
 #endif
 
     QQmlApplicationEngine engine;
+
+    // Exposed to QML as UpdateCheck. Inert on a source build.
+    UpdateChecker updateChecker;
+    engine.rootContext()->setContextProperty(
+        QStringLiteral("UpdateCheck"), &updateChecker);
+    updateChecker.check();
 
     // Runtime data lives in Contents/Resources once deployed, and in the
     // source tree for a plain build. Prefer the bundle so the .app stays

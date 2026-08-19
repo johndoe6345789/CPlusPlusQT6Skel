@@ -124,10 +124,48 @@ ApplicationWindow {
         }
     }
 
+    // Only ever visible in a release build: UpdateCheck.enabled is false for a
+    // source build, where rebuilding is the update mechanism.
+    Rectangle {
+        id: updateBanner
+        visible: UpdateCheck.enabled && UpdateCheck.updateAvailable
+        anchors {
+            top: dbalBanner.visible
+                ? dbalBanner.bottom : parent.top
+            left: parent.left
+            right: parent.right
+        }
+        height: 28; color: "#1E7A3C"; z: 10
+
+        RowLayout {
+            anchors.centerIn: parent
+            spacing: 12
+            CText {
+                variant: "caption"; color: "#fff"
+                text: UpdateCheck.downloading
+                    ? "Downloading " + UpdateCheck.latestVersion
+                        + "\u2026 " + UpdateCheck.downloadPercent + "%"
+                    : "Version " + UpdateCheck.latestVersion
+                        + " is available"
+            }
+            CButton {
+                visible: !UpdateCheck.downloading
+                text: "Download"
+                variant: "ghost"; size: "sm"
+                activeFocusOnTab: true
+                Accessible.role: Accessible.Button
+                Accessible.name: "Download update"
+                Keys.onReturnPressed: UpdateCheck.download()
+                onClicked: UpdateCheck.download()
+            }
+        }
+    }
+
     RowLayout {
         anchors.fill: parent; spacing: 0
         anchors.topMargin:
-            dbalBanner.visible ? 28 : 0
+            (dbalBanner.visible ? 28 : 0)
+            + (updateBanner.visible ? 28 : 0)
         CSidebar {
             objectName: "sidebar"
             currentView: appWindow.currentView

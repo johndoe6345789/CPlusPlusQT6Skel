@@ -365,6 +365,18 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
         lines.append(block)
         lines.append("")
 
+    upd = config.get("update", {})
+    if upd.get("repo"):
+        lines.append("# Update channel. A source build stays on \"dev\" and never checks for")
+        lines.append("# updates; the release pipeline configures with -DMETABUILDER_CHANNEL=release.")
+        lines.append(f'set(METABUILDER_CHANNEL "{upd.get("default_channel", "dev")}" CACHE STRING "Build channel: dev or release")')
+        lines.append(f'target_compile_definitions({proj["executable"]} PRIVATE')
+        lines.append('    METABUILDER_CHANNEL="${METABUILDER_CHANNEL}"')
+        lines.append(f'    METABUILDER_VERSION="{proj["version"]}"')
+        lines.append(f'    METABUILDER_UPDATE_REPO="{upd["repo"]}"')
+        lines.append(f'    METABUILDER_TAG_PREFIX="{upd.get("tag_prefix", "")}")')
+        lines.append("")
+
     # Application icon: macOS gets the .icns through the bundle below; Windows
     # needs an ICON resource compiled into the exe, Linux needs hicolor PNGs
     # plus a .desktop entry, and every platform gets a runtime window icon so
