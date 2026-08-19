@@ -13,7 +13,10 @@
       "Qml",
       "Network",
       "QuickControls2"
-    ]
+    ],
+    "feature_components": {
+      "qt_multimedia": "Multimedia"
+    }
   },
   "cpp": {
     "standard": 20
@@ -58,5 +61,18 @@
     "repo": "johndoe6345789/metabuilder",
     "default_channel": "dev",
     "tag_prefix": "qt6-v"
+  },
+  "paths": {
+    "shared_qml_roots": [
+      "../../libraries/qml",
+      "qml"
+    ],
+    "qmllib": "qmllib",
+    "packages": "packages",
+    "config": "config",
+    "src": "src",
+    "svg_assets": "assets/svg",
+    "audio_assets": "assets/audio",
+    "entry_point": "main.cpp"
   }
 }

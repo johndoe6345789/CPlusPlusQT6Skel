@@ -42,6 +42,28 @@ def _scan_dir(directory: str, extensions: tuple[str, ...]) -> list[str]:
     return sorted(result)
 
 
+# Project layout. Defaults mirror the values that used to be hardcoded
+# throughout this file; cmake_config.json's "paths" overrides any of them.
+# Keeping the layout in config is the point -- a hardcoded module list here
+# went stale across a refactor and quietly dropped the component library out
+# of the build.
+PATHS: dict = {
+    "shared_qml_roots": ["../../libraries/qml", "qml"],
+    "qmllib": "qmllib",
+    "packages": "packages",
+    "config": "config",
+    "src": "src",
+    "svg_assets": "assets/svg",
+    "audio_assets": "assets/audio",
+    "entry_point": "main.cpp",
+}
+
+
+def apply_paths(config: dict) -> None:
+    """Merge the JSON "paths" block over the defaults."""
+    PATHS.update(config.get("paths", {}) or {})
+
+
 def find_shared_qml_root(root_dir: Path) -> Optional[Path]:
     """Locate the shared QML component tree.
 
@@ -50,8 +72,8 @@ def find_shared_qml_root(root_dir: Path) -> Optional[Path]:
     the standalone one, where the same tree is vendored in as ./qml/.
     """
     candidates = [
-        root_dir.parent.parent / "libraries" / "qml",
-        root_dir / "qml",
+        (root_dir / rel).resolve() if rel.startswith("..") else root_dir / rel
+        for rel in PATHS["shared_qml_roots"]
     ]
     for candidate in candidates:
         if candidate.is_dir():
@@ -99,7 +121,7 @@ def find_qmllib_files(root_dir: Path,
     dirs_to_scan: list[tuple[Path, str]] = []
 
     # Local qmllib/ with symlinks
-    qmllib_dir = root_dir / "qmllib"
+    qmllib_dir = root_dir / PATHS["qmllib"]
     if qmllib_dir.exists():
         dirs_to_scan.append((qmllib_dir, "qmllib"))
 
@@ -148,7 +170,7 @@ def find_qmllib_files(root_dir: Path,
 
 def find_package_qml_files(root_dir: Path) -> list[str]:
     """Find all *.qml and *.js files in packages/ subdirectories."""
-    packages_dir = root_dir / "packages"
+    packages_dir = root_dir / PATHS["packages"]
     if not packages_dir.exists():
         return []
     files = sorted(
@@ -159,7 +181,7 @@ def find_package_qml_files(root_dir: Path) -> list[str]:
 
 def find_config_files(root_dir: Path) -> dict[str, list[str]]:
     """Find config/ files: JS goes into QML_FILES, JSON into RESOURCES."""
-    config_dir = root_dir / "config"
+    config_dir = root_dir / PATHS["config"]
     result = {"qml": [], "resources": []}
     if not config_dir.exists():
         return result
@@ -172,7 +194,7 @@ def find_config_files(root_dir: Path) -> dict[str, list[str]]:
 
 def load_package_metadata(root_dir: Path) -> list[dict]:
     """Read metadata.json from each packages/ subdirectory."""
-    packages_dir = root_dir / "packages"
+    packages_dir = root_dir / PATHS["packages"]
     if not packages_dir.exists():
         return []
     metadata = []
@@ -186,7 +208,7 @@ def load_package_metadata(root_dir: Path) -> list[dict]:
 
 def find_svg_assets(root_dir: Path) -> list[str]:
     """Glob SVG assets from assets/svg/."""
-    svg_dir = root_dir / "assets" / "svg"
+    svg_dir = root_dir / PATHS["svg_assets"]
     if not svg_dir.exists():
         return []
     files = sorted(svg_dir.glob("*.svg"))
@@ -195,7 +217,7 @@ def find_svg_assets(root_dir: Path) -> list[str]:
 
 def find_audio_assets(root_dir: Path) -> list[str]:
     """Glob audio assets from assets/audio/."""
-    audio_dir = root_dir / "assets" / "audio"
+    audio_dir = root_dir / PATHS["audio_assets"]
     if not audio_dir.exists():
         return []
     files = sorted(audio_dir.rglob("*"))
@@ -204,7 +226,7 @@ def find_audio_assets(root_dir: Path) -> list[str]:
 
 def find_cpp_sources(root_dir: Path) -> dict[str, list[str]]:
     """Find all *.cpp, *.h, and *.hpp files in src/."""
-    src_dir = root_dir / "src"
+    src_dir = root_dir / PATHS["src"]
     result = {"cpp": [], "h": []}
     if not src_dir.exists():
         return result
@@ -238,16 +260,18 @@ def generate_cmake(config: dict, root_dir: Path) -> str:
     packages_meta = load_package_metadata(root_dir)
 
     # Build Qt components string
-    extra_components = []
-    if features.get("qt_multimedia"):
-        extra_components.append("Multimedia")
+    extra_components = [
+        component
+        for feature, component in qt.get("feature_components", {}).items()
+        if features.get(feature)
+    ]
     all_components = qt["components"] + extra_components
     qt_components_str = " ".join(all_components)
 
     # Build source files list
     # .hpp files with Q_OBJECT must be listed so AUTOMOC scans them
     hpp_headers = [h for h in cpp_sources["h"] if h.endswith(".hpp")]
-    source_files = ["main.cpp"] + cpp_sources["cpp"] + hpp_headers
+    source_files = [PATHS["entry_point"]] + cpp_sources["cpp"] + hpp_headers
 
     # Collect all QML files: (path, alias_or_None)
     all_qml: list[tuple[str, Optional[str]]] = []
@@ -576,6 +600,7 @@ def main():
         config_path = root_dir / config_path
 
     config = load_config(str(config_path))
+    apply_paths(config)
     content = generate_cmake(config, root_dir)
 
     if args.dry_run:
