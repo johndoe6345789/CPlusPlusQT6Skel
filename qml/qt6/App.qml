@@ -135,37 +135,78 @@ ApplicationWindow {
             left: parent.left
             right: parent.right
         }
-        height: 28; color: "#1E7A3C"; z: 10
+        // Tall enough for a tappable control; a 28px band clipped the action.
+        height: 34; color: "#1E7A3C"; z: 10
+
+        readonly property bool compact: width < 420
 
         RowLayout {
             anchors.centerIn: parent
-            spacing: 12
+            width: Math.min(parent.width - 24, implicitWidth)
+            spacing: 10
+
             CText {
+                Layout.fillWidth: true
                 variant: "caption"; color: "#fff"
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignRight
                 text: UpdateCheck.downloading
-                    ? "Downloading " + UpdateCheck.latestVersion
-                        + "\u2026 " + UpdateCheck.downloadPercent + "%"
-                    : "Version " + UpdateCheck.latestVersion
-                        + " is available"
+                    ? (updateBanner.compact
+                        ? UpdateCheck.downloadPercent + "%"
+                        : "Downloading " + UpdateCheck.latestVersion
+                            + "\u2026 " + UpdateCheck.downloadPercent + "%")
+                    : (updateBanner.compact
+                        ? "v" + UpdateCheck.latestVersion + " available"
+                        : "Version " + UpdateCheck.latestVersion
+                            + " is available")
             }
-            CButton {
+
+            // Built from primitives rather than CButton: the native macOS
+            // style discards a Control's custom background and contentItem,
+            // which is what left the action mis-coloured and overflowing.
+            Rectangle {
+                id: updateAction
                 visible: !UpdateCheck.downloading
-                text: "Download"
-                variant: "ghost"; size: "sm"
-                activeFocusOnTab: true
+                implicitWidth: actionLabel.implicitWidth + 20
+                implicitHeight: 22
+                radius: 11
+                color: actionMouse.containsMouse
+                    ? Qt.rgba(1, 1, 1, 0.28)
+                    : Qt.rgba(1, 1, 1, 0.16)
+                border.width: 1
+                border.color: Qt.rgba(1, 1, 1, 0.45)
+
                 Accessible.role: Accessible.Button
-                Accessible.name: "Download update"
-                Keys.onReturnPressed: UpdateCheck.download()
-                onClicked: UpdateCheck.download()
+                Accessible.name: "Download update "
+                    + UpdateCheck.latestVersion
+                Accessible.onPressAction: UpdateCheck.download()
+
+                Text {
+                    id: actionLabel
+                    anchors.centerIn: parent
+                    text: "Download"
+                    color: "#fff"
+                    font.pixelSize: 11
+                    font.weight: Font.DemiBold
+                }
+                MouseArea {
+                    id: actionMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: UpdateCheck.download()
+                }
             }
         }
     }
 
     RowLayout {
         anchors.fill: parent; spacing: 0
+        // Bind to the banners' actual heights; a hardcoded offset silently
+        // desynchronises the moment either banner changes size.
         anchors.topMargin:
-            (dbalBanner.visible ? 28 : 0)
-            + (updateBanner.visible ? 28 : 0)
+            (dbalBanner.visible ? dbalBanner.height : 0)
+            + (updateBanner.visible ? updateBanner.height : 0)
         CSidebar {
             objectName: "sidebar"
             currentView: appWindow.currentView
