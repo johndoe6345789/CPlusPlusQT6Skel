@@ -74,5 +74,102 @@
     "svg_assets": "assets/svg",
     "audio_assets": "assets/audio",
     "entry_point": "main.cpp"
+  },
+  "cmake_blocks": {
+    "update_channel": {
+      "when": "update.repo",
+      "lines": [
+        "# Update channel. A source build stays on \"dev\" and never checks for",
+        "# updates; the release pipeline configures with -DMETABUILDER_CHANNEL=release.",
+        "set(METABUILDER_CHANNEL \"@channel@\" CACHE STRING \"Build channel: dev or release\")",
+        "target_compile_definitions(@executable@ PRIVATE",
+        "    METABUILDER_CHANNEL=\"${METABUILDER_CHANNEL}\"",
+        "    METABUILDER_VERSION=\"@version@\"",
+        "    METABUILDER_UPDATE_REPO=\"@repo@\"",
+        "    METABUILDER_TAG_PREFIX=\"@tag_prefix@\")",
+        ""
+      ]
+    },
+    "icon_runtime": {
+      "when": "icon.runtime_png",
+      "lines": [
+        "# Application icon",
+        "qt_add_resources(@executable@ \"app_icon\"",
+        "    PREFIX \"/\"",
+        "    BASE \"assets/icon\"",
+        "    FILES @runtime_png@",
+        ")",
+        ""
+      ],
+      "note": "macOS gets the .icns through the bundle; Windows needs an ICON resource compiled into the exe, Linux needs hicolor PNGs plus a .desktop entry, and every platform gets a runtime window icon so the taskbar shows something even for an unbundled build."
+    },
+    "icon_windows": {
+      "when": "icon.ico",
+      "lines": [
+        "if(WIN32)",
+        "    set(APP_ICON_ICO \"${CMAKE_CURRENT_SOURCE_DIR}/@ico@\")",
+        "    configure_file(\"${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/app.rc.in\"",
+        "        \"${CMAKE_CURRENT_BINARY_DIR}/app.rc\" @ONLY)",
+        "    target_sources(@executable@ PRIVATE \"${CMAKE_CURRENT_BINARY_DIR}/app.rc\")",
+        "endif()",
+        ""
+      ]
+    },
+    "icon_linux": {
+      "when": "icon.linux_dir",
+      "lines": [
+        "if(UNIX AND NOT APPLE)",
+        "    # Freedesktop icon theme layout: hicolor/<size>x<size>/apps/<Icon>.png",
+        "    foreach(_sz 16 22 24 32 48 64 128 256 512)",
+        "        install(FILES \"${CMAKE_CURRENT_SOURCE_DIR}/@linux_dir@/metabuilder-${_sz}.png\"",
+        "            DESTINATION \"share/icons/hicolor/${_sz}x${_sz}/apps\"",
+        "            RENAME \"metabuilder.png\")",
+        "    endforeach()",
+        "    install(FILES \"${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/metabuilder.desktop\"",
+        "        DESTINATION \"share/applications\")",
+        "endif()",
+        ""
+      ]
+    },
+    "sparkle": {
+      "when": "features.sparkle",
+      "note": "Sparkle ships a prebuilt framework rather than a CMake project, so SOURCE_SUBDIR points at a path that does not exist to make FetchContent_MakeAvailable skip add_subdirectory. Info.plist uses @ONLY so CMake's own ${MACOSX_BUNDLE_*} placeholders survive.",
+      "lines": [
+        "",
+        "    # Sparkle ships a prebuilt framework, not a CMake project, so point",
+        "    # SOURCE_SUBDIR at a path that does not exist to skip add_subdirectory.",
+        "    include(FetchContent)",
+        "    FetchContent_Declare(sparkle",
+        "        URL https://github.com/sparkle-project/Sparkle/releases/download/@version@/Sparkle-@version@.tar.xz",
+        "        URL_HASH SHA256=@sha256@",
+        "        DOWNLOAD_EXTRACT_TIMESTAMP TRUE",
+        "        SOURCE_SUBDIR sparkle-is-not-a-cmake-project",
+        "    )",
+        "    FetchContent_MakeAvailable(sparkle)",
+        "",
+        "    # @-substitution only, so CMake's own ${MACOSX_BUNDLE_*} placeholders",
+        "    # survive to be filled in when the bundle is assembled.",
+        "    set(SPARKLE_FEED_URL \"@feed_url@\")",
+        "    set(SPARKLE_PUBLIC_KEY \"@public_key@\")",
+        "    configure_file(\"${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in\"",
+        "        \"${CMAKE_CURRENT_BINARY_DIR}/Info.plist\" @ONLY)",
+        "",
+        "    target_sources(@executable@ PRIVATE src/SparkleUpdater.mm)",
+        "    target_compile_definitions(@executable@ PRIVATE METABUILDER_SPARKLE=1)",
+        "    target_include_directories(@executable@ PRIVATE \"${sparkle_SOURCE_DIR}\")",
+        "    target_link_libraries(@executable@ PRIVATE \"${sparkle_SOURCE_DIR}/Sparkle.framework\")",
+        "    set_target_properties(@executable@ PROPERTIES",
+        "        MACOSX_BUNDLE_INFO_PLIST \"${CMAKE_CURRENT_BINARY_DIR}/Info.plist\"",
+        "        INSTALL_RPATH \"@executable_path/../Frameworks\"",
+        "        BUILD_WITH_INSTALL_RPATH TRUE)",
+        "",
+        "    # Sparkle must live inside the bundle it updates.",
+        "    add_custom_command(TARGET @executable@ POST_BUILD",
+        "        COMMAND ${CMAKE_COMMAND} -E copy_directory",
+        "            \"${sparkle_SOURCE_DIR}/Sparkle.framework\"",
+        "            \"$<TARGET_BUNDLE_CONTENT_DIR:@executable@>/Frameworks/Sparkle.framework\"",
+        "        VERBATIM)"
+      ]
+    }
   }
 }

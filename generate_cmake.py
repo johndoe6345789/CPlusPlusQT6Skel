@@ -240,6 +240,46 @@ def find_cpp_sources(root_dir: Path) -> dict[str, list[str]]:
     return result
 
 
+def render_block(name: str, config: dict, values: dict) -> list[str]:
+    """Render a CMake block declared in cmake_config.json's "cmake_blocks".
+
+    A block is a list of strings (one per output line) plus an optional
+    "when" naming a dotted config path that must be truthy for it to emit.
+
+    Substitution uses @name@ rather than ${name} deliberately: CMake's own
+    variable syntax is ${...} and appears throughout these templates, so a
+    ${...} placeholder would collide with the very text being emitted. This
+    mirrors configure_file(... @ONLY), which exists for the same reason.
+
+    A placeholder must be closed by a second @. That is what keeps macOS
+    loader syntax intact -- INSTALL_RPATH "@executable_path/../Frameworks"
+    survives precisely because @executable_path is not @executable@. Do not
+    relax this into a bare @name match, and avoid naming a value after a
+    loader prefix (executable_path, loader_path, rpath).
+    """
+    block = (config.get("cmake_blocks", {}) or {}).get(name)
+    if not block:
+        return []
+
+    when = block.get("when")
+    if when:
+        node = config
+        for part in when.split("."):
+            if not isinstance(node, dict):
+                node = None
+                break
+            node = node.get(part)
+        if not node:
+            return []
+
+    out = []
+    for line in block.get("lines", []):
+        for key, val in values.items():
+            line = line.replace(f"@{key}@", str(val))
+        out.append(line)
+    return out
+
+
 def generate_cmake(config: dict, root_dir: Path) -> str:
     """Generate the full CMakeLists.txt content from config and discovered files."""
     proj = config["project"]
@@ -406,50 +446,27 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
         lines.append("")
 
     upd = config.get("update", {})
-    if upd.get("repo"):
-        lines.append("# Update channel. A source build stays on \"dev\" and never checks for")
-        lines.append("# updates; the release pipeline configures with -DMETABUILDER_CHANNEL=release.")
-        lines.append(f'set(METABUILDER_CHANNEL "{upd.get("default_channel", "dev")}" CACHE STRING "Build channel: dev or release")')
-        lines.append(f'target_compile_definitions({proj["executable"]} PRIVATE')
-        lines.append('    METABUILDER_CHANNEL="${METABUILDER_CHANNEL}"')
-        lines.append(f'    METABUILDER_VERSION="{proj["version"]}"')
-        lines.append(f'    METABUILDER_UPDATE_REPO="{upd["repo"]}"')
-        lines.append(f'    METABUILDER_TAG_PREFIX="{upd.get("tag_prefix", "")}")')
-        lines.append("")
+    lines.extend(render_block("update_channel", config, {
+        "executable": proj["executable"],
+        "version": proj["version"],
+        "channel": upd.get("default_channel", "dev"),
+        "repo": upd.get("repo", ""),
+        "tag_prefix": upd.get("tag_prefix", ""),
+    }))
 
     # Application icon: macOS gets the .icns through the bundle below; Windows
     # needs an ICON resource compiled into the exe, Linux needs hicolor PNGs
     # plus a .desktop entry, and every platform gets a runtime window icon so
     # the taskbar/dock shows something even for a plain (unbundled) build.
     icon_cfg = config.get("icon", {})
-    if icon_cfg.get("runtime_png"):
-        lines.append("# Application icon")
-        lines.append(f'qt_add_resources({proj["executable"]} "app_icon"')
-        lines.append('    PREFIX "/"')
-        lines.append('    BASE "assets/icon"')
-        lines.append(f'    FILES {icon_cfg["runtime_png"]}')
-        lines.append(")")
-        lines.append("")
-    if icon_cfg.get("ico"):
-        lines.append("if(WIN32)")
-        lines.append(f'    set(APP_ICON_ICO "${{CMAKE_CURRENT_SOURCE_DIR}}/{icon_cfg["ico"]}")')
-        lines.append('    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/app.rc.in"')
-        lines.append('        "${CMAKE_CURRENT_BINARY_DIR}/app.rc" @ONLY)')
-        lines.append(f'    target_sources({proj["executable"]} PRIVATE "${{CMAKE_CURRENT_BINARY_DIR}}/app.rc")')
-        lines.append("endif()")
-        lines.append("")
-    if icon_cfg.get("linux_dir"):
-        lines.append("if(UNIX AND NOT APPLE)")
-        lines.append("    # Freedesktop icon theme layout: hicolor/<size>x<size>/apps/<Icon>.png")
-        lines.append("    foreach(_sz 16 22 24 32 48 64 128 256 512)")
-        lines.append(f'        install(FILES "${{CMAKE_CURRENT_SOURCE_DIR}}/{icon_cfg["linux_dir"]}/metabuilder-${{_sz}}.png"')
-        lines.append('            DESTINATION "share/icons/hicolor/${_sz}x${_sz}/apps"')
-        lines.append('            RENAME "metabuilder.png")')
-        lines.append("    endforeach()")
-        lines.append('    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/metabuilder.desktop"')
-        lines.append('        DESTINATION "share/applications")')
-        lines.append("endif()")
-        lines.append("")
+    icon_values = {
+        "executable": proj["executable"],
+        "runtime_png": icon_cfg.get("runtime_png", ""),
+        "ico": icon_cfg.get("ico", ""),
+        "linux_dir": icon_cfg.get("linux_dir", ""),
+    }
+    for _blk in ("icon_runtime", "icon_windows", "icon_linux"):
+        lines.extend(render_block(_blk, config, icon_values))
 
     # macOS app bundle — macdeployqt and .dmg packaging both require one
     macos = config.get("macos", {})
@@ -474,44 +491,14 @@ target_link_libraries({proj["executable"]} PRIVATE ${{OPENMPT_LIBRARIES}})""")
             lines.append("        PROPERTIES MACOSX_PACKAGE_LOCATION Resources)")
             lines.append(f'    target_sources({proj["executable"]} PRIVATE "${{CMAKE_CURRENT_SOURCE_DIR}}/{icon}")')
 
-        sparkle = macos.get("sparkle")
-        if sparkle and config.get("features", {}).get("sparkle"):
-            exe = proj["executable"]
-            ver = sparkle["version"]
-            lines.append("")
-            lines.append("    # Sparkle ships a prebuilt framework, not a CMake project, so point")
-            lines.append("    # SOURCE_SUBDIR at a path that does not exist to skip add_subdirectory.")
-            lines.append("    include(FetchContent)")
-            lines.append("    FetchContent_Declare(sparkle")
-            lines.append(f"        URL https://github.com/sparkle-project/Sparkle/releases/download/{ver}/Sparkle-{ver}.tar.xz")
-            lines.append(f'        URL_HASH SHA256={sparkle["sha256"]}')
-            lines.append("        DOWNLOAD_EXTRACT_TIMESTAMP TRUE")
-            lines.append("        SOURCE_SUBDIR sparkle-is-not-a-cmake-project")
-            lines.append("    )")
-            lines.append("    FetchContent_MakeAvailable(sparkle)")
-            lines.append("")
-            lines.append("    # @-substitution only, so CMake's own ${MACOSX_BUNDLE_*} placeholders")
-            lines.append("    # survive to be filled in when the bundle is assembled.")
-            lines.append(f'    set(SPARKLE_FEED_URL "{sparkle["feed_url"]}")')
-            lines.append(f'    set(SPARKLE_PUBLIC_KEY "{sparkle["public_key"]}")')
-            lines.append('    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"')
-            lines.append('        "${CMAKE_CURRENT_BINARY_DIR}/Info.plist" @ONLY)')
-            lines.append("")
-            lines.append(f"    target_sources({exe} PRIVATE src/SparkleUpdater.mm)")
-            lines.append(f"    target_compile_definitions({exe} PRIVATE METABUILDER_SPARKLE=1)")
-            lines.append(f'    target_include_directories({exe} PRIVATE "${{sparkle_SOURCE_DIR}}")')
-            lines.append(f'    target_link_libraries({exe} PRIVATE "${{sparkle_SOURCE_DIR}}/Sparkle.framework")')
-            lines.append(f"    set_target_properties({exe} PROPERTIES")
-            lines.append('        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_BINARY_DIR}/Info.plist"')
-            lines.append('        INSTALL_RPATH "@executable_path/../Frameworks"')
-            lines.append("        BUILD_WITH_INSTALL_RPATH TRUE)")
-            lines.append("")
-            lines.append("    # Sparkle must live inside the bundle it updates.")
-            lines.append(f"    add_custom_command(TARGET {exe} POST_BUILD")
-            lines.append("        COMMAND ${CMAKE_COMMAND} -E copy_directory")
-            lines.append('            "${sparkle_SOURCE_DIR}/Sparkle.framework"')
-            lines.append(f'            "$<TARGET_BUNDLE_CONTENT_DIR:{exe}>/Frameworks/Sparkle.framework"')
-            lines.append("        VERBATIM)")
+        sparkle = macos.get("sparkle") or {}
+        lines.extend(render_block("sparkle", config, {
+            "executable": proj["executable"],
+            "version": sparkle.get("version", ""),
+            "sha256": sparkle.get("sha256", ""),
+            "feed_url": sparkle.get("feed_url", ""),
+            "public_key": sparkle.get("public_key", ""),
+        }))
         lines.append("    # The engine reads these from disk at runtime, so copy them into")
         lines.append("    # Contents/Resources to keep the bundle relocatable.")
         lines.append(f"    add_custom_command(TARGET {proj['executable']} POST_BUILD")
